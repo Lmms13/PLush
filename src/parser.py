@@ -1,8 +1,39 @@
 from lexer import tokens
+from abc import ABC
+from dataclasses import dataclass
 import ply.yacc as yacc # type: ignore
-parser = yacc.yacc()
 
-#array
+
+#statements
+
+class Expression(ABC):
+    pass
+
+class Statement(ABC):
+    pass
+
+class Declaration(ABC):
+    pass
+
+class Definition(ABC):
+    pass
+
+
+
+#declaration
+#definition
+#expressions
+
+# # dictionary of names
+# names = { }
+
+# # Parsing rules
+
+# # precedence = (
+# #     ('left','PLUS','MINUS'),
+# #     ('left','TIMES','DIVIDE'),
+# #     ('right','UMINUS'),
+# #     )
 
 # def p_array(p):
 #     'array : LBRACKET elements RBRACKET'
@@ -17,7 +48,8 @@ parser = yacc.yacc()
 #         p[0] = [p[1]]
 
 # def p_element(p):
-#     '''element : NUMBER
+#     '''element : INTEGER
+#                | FLOAT
 #                | STRING
 #                | CHAR
 #                | array'''
@@ -25,6 +57,21 @@ parser = yacc.yacc()
 
 # def p_error(p):
 #     print("Syntax error at '%s'" % p.value)
+
+
+
+
+# parser = yacc.yacc()
+
+#array
+
+
+# while True:
+#     try:
+#         s = input('')   # Use raw_input on Python 2
+#     except EOFError:
+#         break
+#     parser.parse(s)
 
 
 
@@ -80,5 +127,5 @@ parser = yacc.yacc()
 
 #index access
 # def p_index_access(p):
-#     'index_access : IDENTIFIER LBRACKET expression RBRACKET'
+#     'index_access : NAME LBRACKET expression RBRACKET'
 #     p[0] = ('index_access', p[1], p[3])
