@@ -50,9 +50,9 @@ t_TRUE = r'true'
 t_FALSE = r'false'
 t_ASSIGN = r':='
 t_IF = r'if'
-t_VAR = r'var'
-t_VAL = r'val'
-t_FUNCTION = r'function'
+#t_VAR = r'var'
+#t_VAL = r'val'
+#t_FUNCTION = r'function'
 t_LCURLY = r'{'
 t_RCURLY = r'}'
 t_LBRACKET = r'\['
@@ -70,12 +70,12 @@ t_COLON = r':'
 #t_COMMENT = r'\#.*$'
 #t_NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
 #t_HASHTAG = r'\#'
-t_VOIDTYPE= r'void'
-t_STRINGTYPE = r'string'
-t_INTTYPE = r'int'
-t_FLOATTYPE = r'float'
-t_CHARTYPE = r'char'
-t_BOOLEANTYPE = r'boolean'
+# t_VOIDTYPE= r'void'
+# t_STRINGTYPE = r'string'
+# t_INTTYPE = r'int'
+# t_FLOATTYPE = r'float'
+# t_CHARTYPE = r'char'
+# t_BOOLEANTYPE = r'boolean'
 #t_ARRAY = r'\[\s*((\d+|(\d*\.\d+)|\'(\\.|[^\'])*\'|\"(\\.|[^\"])*\")(\s*,\s*(\d+|(\d*\.\d+)|\'(\\.|[^\'])*\'|\"(\\.|[^\"])*\"))*)?\s*\]'
 
 # Ignored characters
@@ -89,22 +89,60 @@ def t_COMMENT(t):
     r'\#.*'
     return t
 
-def t_INTEGER(t):
-    r'\d((\_|\d)*\d)?'
-    t.value = t.value.replace("_","")
-    return t
-
-
 def t_FLOAT(t):
     r'(\d)*\.(\d)+'
     t.value = float(t.value)
     return t
 
+def t_INTEGER(t):
+    r'\d((\_|\d)*\d)?'
+    t.value = t.value.replace("_","")
+    return t
+
+def t_FUNCTION(t): 
+    r'^function'
+    return t
+
+def t_VAR(t):
+    r'var'
+    return t
+
+def t_VAL(t):
+    r'val'
+    return t
+
+def t_INTTYPE(t):
+    r'int'
+    return t
+
+def t_FLOATTYPE(t): 
+    r'float'
+    return t    
+
+def t_STRINGTYPE(t):
+    r'string'
+    return t
+
+def t_CHARTYPE(t):
+    r'char'
+    return t
+
+def t_BOOLEAN(t):
+    r'boolean'
+    return t
+
+def t_VOIDTYPE(t):
+    r'void'
+    return t
+
+
 def t_NAME(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
     if t.value in reserved:
-        t.type = t.value.upper()
-    return t
+        return locals()["t_" + reserved[t.value]](t)
+    else:
+        print(t)
+        return t
 
 
 
