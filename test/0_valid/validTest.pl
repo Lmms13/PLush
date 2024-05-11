@@ -1,18 +1,17 @@
-var i : int := 0;
+function countOccurrences(val n: int, val a: [int]) : int {
+	val len : int := array_length(a);
+	var i : int := 0;
+	var count : int := 0; 
+	while i < len {
+        if a[i] = n {
+			count := count + 1;
+		}
+		i := i + 1;
+	} 
+	countOccurrences := count;
+}
 
-function abc() : string {
-    1+2;
-    val y : string := "aa";
-    a+b;
-    arr[0+1];
-    if i < 9{
-        while i > 4{
-            arr[1*7];            
-        }
-    } else{
-            abc(1+r, true && false);
-    }
-    i := 1+2; 
-	abc := a*b;
-    abc(1+r, true && false);
+function main(val args:[string]) {
+	val result : int := maxRangeSquared(actual_min, actual_max);
+	print_int(result);
 }

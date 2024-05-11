@@ -29,11 +29,11 @@ function isPalindrome(val str: string) : int {
 function string_length(val str: string) : int;
 
 #declaration of function for FFI
-function string_get_char_at(val str: string, val index: int) : str;
+function string_get_char_at(val str: string, val index: int) : string;
 
 
 function main(val args:[string]) {
-	val str : double := "racecar"; 
+	val str : float := "racecar"; 
 	val result : int := isPalindrome(str);
 	#val result : bool := isPalindrome(str);
 	print_int(result);

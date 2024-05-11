@@ -166,7 +166,7 @@ class IndexAcess(Expression):
 
 @dataclass
 class ReturnOrReassign(Statement):
-    name: str
+    name: Union[str,IndexAcess]
     value: Expression
 
 @dataclass
@@ -379,8 +379,12 @@ def p_expression_name(p):
 
 
 def p_function_definition(p):
-    '''function_definition : FUNCTION NAME LPAREN parameters RPAREN COLON type LCURLY body RCURLY'''
-    func = FunctionDefinition(p[2], p[4], p[7], p[9])
+    '''function_definition : FUNCTION NAME LPAREN parameters RPAREN COLON type LCURLY body RCURLY
+                           | FUNCTION NAME LPAREN parameters RPAREN LCURLY body RCURLY'''
+    if len(p) == 11:
+        func = FunctionDefinition(p[2], p[4], p[7], p[9])
+    else:
+        func = FunctionDefinition(p[2], p[4], 'void', p[7])
     for s in func.body:
         if isinstance(s, VariableDefinition) or isinstance(s, ValueDefinition):
             func.local_vars[s.pointer.name] = s.pointer
@@ -446,12 +450,20 @@ def p_function_definition(p):
     p[0] = func
 
 def p_function_declaration(p):
-    'function_declaration : FUNCTION NAME LPAREN parameters RPAREN COLON type SEMICOLON'
-    p[0] = FunctionDeclaration(p[2], p[4], p[7])
+    '''function_declaration : FUNCTION NAME LPAREN parameters RPAREN COLON type SEMICOLON
+                            | FUNCTION NAME LPAREN parameters RPAREN SEMICOLON'''
+    if len(p) == 9:
+        p[0] = FunctionDeclaration(p[2], p[4], p[7])
+    else:
+        p[0] = FunctionDeclaration(p[2], p[4], 'void')
 
 def p_return_or_reassign_statement(p):
-    'return_or_reassign_statement : NAME ASSIGN expression SEMICOLON'
-    p[0] = ReturnOrReassign(p[1], p[3])
+    '''return_or_reassign_statement : NAME ASSIGN expression SEMICOLON
+                                    | NAME LBRACKET expression RBRACKET ASSIGN expression SEMICOLON'''
+    if len(p) == 5:
+        p[0] = ReturnOrReassign(p[1], p[3])
+    else:
+        p[0] = ReturnOrReassign(IndexAcess(p[1], p[3]), p[6])
 
 
 def p_parameters(p):
@@ -459,14 +471,10 @@ def p_parameters(p):
                   | parameter
                   | empty'''
     params = {}
-    data = list()
     if p[1] is not None:
+        params.update(dict([p[1]]))
         if len(p) == 4:
-            print(p[3])
-            data = [p[1]] + [p[3]]
-        else:
-            data = [p[1]]
-        params.update(data)
+            params.update(p[3])
     p[0] = params 
 
 def p_parameter(p):
@@ -572,7 +580,7 @@ ast = []
 #     print(parser.parse(s))
 #     ast.append(parser.parse(s))
 
-with open('../test/0_valid/validTest.pl', 'r') as file:
+with open('../test/0_valid/maxRangeSquared.pl', 'r') as file:
     data = file.read()
 
 result = parser.parse(data)

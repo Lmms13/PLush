@@ -112,72 +112,82 @@ def t_INTEGER(t):
     t.value = t.value.replace("_","")
     return t
 
+def t_NAME(t):
+    r'[a-zA-Z_][a-zA-Z0-9_]*'
+    if t.value in reserved:     
+        return globals()["t_" + reserved[t.value]](t)
+    else:
+        return t
+
 def t_FUNCTION(t): 
     r'function'
+    t.type = 'FUNCTION'
     return t
 
 def t_VAR(t):
     r'var'
+    t.type = 'VAR'
     return t
 
 def t_VAL(t):
     r'val'
+    t.type = 'VAL'
     return t
 
 def t_INTTYPE(t):
     r'int'
+    t.type = 'INTTYPE'
     return t
 
 def t_FLOATTYPE(t): 
     r'float'
+    t.type = 'FLOATTYPE'
     return t    
 
 def t_STRINGTYPE(t):
     r'string'
+    t.type = 'STRINGTYPE'
     return t
 
 def t_CHARTYPE(t):
     r'char'
+    t.type = 'CHARTYPE'
     return t
 
 def t_BOOLEANTYPE(t):
     r'boolean'
+    t.type = 'BOOLEANTYPE'
     return t
 
 def t_VOIDTYPE(t):
     r'void'
+    t.type = 'VOIDTYPE'
     return t
 
 def t_TRUE(t):
     r'true'
+    t.type = 'TRUE'
     return t
 
 def t_FALSE(t):
     r'false'
+    t.type = 'FALSE'
     return t
 
 def t_IF(t):
     r'if'
+    t.type = 'IF'
     return t
 
 def t_ELSE(t):
     r'else'
+    t.type = 'ELSE'
     return t
 
 def t_WHILE(t):
     r'while'
+    t.type = 'WHILE'
     return t
-
-
-
-def t_NAME(t):
-    r'[a-zA-Z_][a-zA-Z0-9_]*'
-    if t.value in reserved:
-        return locals()["t_" + reserved[t.value]](t)
-    else:
-        return t
-
-
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
@@ -188,7 +198,7 @@ import ply.lex as lex # type: ignore
 lexer = lex.lex()
 
 if __name__ == '__main__':
-    lexer.input("\"asasas\"")
+    lexer.input("function string_get_char_at(val str: string, val index: int) : str;")
     while True:
         tok = lexer.token()
         if not tok: 
