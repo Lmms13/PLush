@@ -4,7 +4,7 @@ tokens = (
     'AND','OR','NOT',
     'EQUAL','NOTEQUAL','LESS','GREATER','LESSEQUAL','GREATEREQUAL',
     'TRUE','FALSE',
-    'ASSIGN','IF','VAR','VAL','FUNCTION','COMMENT','NAME','WHILE',
+    'ASSIGN','IF','ELSE','VAR','VAL','FUNCTION','COMMENT','NAME','WHILE',
     'LCURLY','RCURLY','LBRACKET','RBRACKET','SEMICOLON','LPAREN','RPAREN','COMMA','COLON',
     'PLUS','MINUS','TIMES','DIVIDE','PERCENT',
     'VOIDTYPE','STRINGTYPE','INTTYPE','FLOATTYPE','CHARTYPE','BOOLEANTYPE'
@@ -17,6 +17,7 @@ reserved = {
     'true': 'TRUE',
     'false': 'FALSE',
     'if': 'IF',
+    'else': 'ELSE',
     'while': 'WHILE',
     'var': 'VAR',
     'val': 'VAL',
@@ -53,8 +54,9 @@ t_GREATEREQUAL = r'>='
 #t_TRUE = r'true'
 #t_FALSE = r'false'
 t_ASSIGN = r':='
-t_IF = r'if'
-t_WHILE = r'while'
+# t_IF = r'if'
+# t_ELSE = r'else'
+# t_WHILE = r'while'
 #t_VAR = r'var'
 #t_VAL = r'val'
 #t_FUNCTION = r'function'
@@ -153,6 +155,19 @@ def t_TRUE(t):
 def t_FALSE(t):
     r'false'
     return t
+
+def t_IF(t):
+    r'if'
+    return t
+
+def t_ELSE(t):
+    r'else'
+    return t
+
+def t_WHILE(t):
+    r'while'
+    return t
+
 
 
 def t_NAME(t):
