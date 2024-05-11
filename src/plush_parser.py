@@ -586,6 +586,6 @@ with open('../test/0_valid/maxRangeSquared.pl', 'r') as file:
 result = parser.parse(data)
 ast.append(result)
 
-print(ast)
+#print(ast)
 
 #error handling
