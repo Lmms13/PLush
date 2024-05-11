@@ -41,6 +41,79 @@ class Value(Expression):
     type: str
 
 @dataclass
+class Add(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class Sub(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class Mul(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class Div(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class Mod(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class And(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class Or(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class Not(Expression):
+    expression: Expression
+
+@dataclass
+class Equal(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class NotEqual(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class Less(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class Greater(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class LessEqual(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class GreaterEqual(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
+class UnaryMinus(Expression):
+    expression: Expression
+
+@dataclass
 class FunctionDefinition(Definition):
     name: str
     local_vars: Dict[str, Union[Variable, Value]]
@@ -86,16 +159,16 @@ class If(Statement):
     then_block: List[Statement]
     else_block: List[Statement]
 
-@dataclass
-class NonEvaluatedExpression(Expression):
-    name1: str
-    name2: str
-    value: Union[Literal,Array]
-    operator: str
+# @dataclass
+# class NonEvaluatedExpression(Expression):
+#     name1: str
+#     name2: str
+#     value: Union[Literal,Array]
+#     operator: str
 
-@dataclass
-class Test(Expression):
-    p: str
+# @dataclass
+# class Test(Expression):
+#     p: str
 
 
 #declaration
@@ -114,15 +187,27 @@ start = 'program'
 
 
 def p_program(p):
-    '''program : function_definition
-                | function_declaration
-                | variable_definition
-                | variable_declaration
-                | value_definition
-                | value_declaration
-                | statement
-                | empty'''
-    p[0] = p[1] #remove array after
+    '''program : statement_list
+               | empty'''
+    p[0] = p[1]
+
+def p_statement_list_1(p):
+    '''statement_list : statement statement_list'''
+    p[0] = [p[1]] + p[2]
+
+def p_statement_list_2(p):
+    '''statement_list : statement'''
+    p[0] = [p[1]]
+
+def p_statement(p):
+    '''statement : function_definition
+                 | function_declaration
+                 | variable_definition
+                 | variable_declaration
+                 | value_definition
+                 | value_declaration
+                 | expression SEMICOLON'''
+    p[0] = p[1]
 
 
 # Parsing rules
@@ -170,7 +255,7 @@ def p_element(p):
 def p_variable_definition(p):
     '''variable_definition : VAR NAME COLON type ASSIGN expression SEMICOLON
                            | VAR NAME COLON type ASSIGN array SEMICOLON'''
-    names[p[2]] = VariableDefinition(Variable(p[2], p[6], p[4]))
+    #names[p[2]] = VariableDefinition(Variable(p[2], p[6], p[4]))
     p[0] = VariableDefinition(Variable(p[2], p[6], p[4]))
 
 def p_variable_declaration(p):
@@ -180,7 +265,7 @@ def p_variable_declaration(p):
 def p_value_definition(p):
     '''value_definition : VAL NAME COLON type ASSIGN expression SEMICOLON
                         | VAL NAME COLON type ASSIGN array SEMICOLON'''
-    names[p[2]] = ValueDefinition(Value(p[2], p[6], p[4]))
+    #names[p[2]] = ValueDefinition(Value(p[2], p[6], p[4]))
     p[0] = ValueDefinition(Value(p[2], p[6], p[4]))
 
 def p_value_declaration(p):
@@ -210,66 +295,68 @@ def p_expression_binop(p):
     #         p[0] = NonEvaluatedExpression(None, p[1].name1, p[1].value, p[2])
     #     else:
     #         p[0] = NonEvaluatedExpression(p[1].name1, p[3].name1 , None, p[2])
-    if(isinstance(p[1], Test) or isinstance(p[3], Test)):
-        if(isinstance(p[1], Test) and not isinstance(p[3], Test)):
-            p[0] = Test(p[1].p + p[2] + str(p[3].value))
-        elif(isinstance(p[3], Test) and not isinstance(p[1], Test)):
-            p[0] = Test(str(p[1].value) + p[2] + p[3].p)
-        else:
-            p[0] = Test(p[1].p + p[2] + p[3].p)
+   
+    # if(isinstance(p[1], Test) or isinstance(p[3], Test)):
+    #     if(isinstance(p[1], Test) and not isinstance(p[3], Test)):
+    #         p[0] = Test(p[1].p + p[2] + str(p[3].value))
+    #     elif(isinstance(p[3], Test) and not isinstance(p[1], Test)):
+    #         p[0] = Test(str(p[1].value) + p[2] + p[3].p)
+    #     else:
+    #         p[0] = Test(p[1].p + p[2] + p[3].p)
             
         
     # elif type(p[1].value) == str or type(p[3].value) == str:
     #     p[0] = Error("Unsupported operation")
-    elif p[2] == '+':
-        p[0] = Literal(p[1].value + p[3].value)
+    if p[2] == '+':
+        p[0] = Add(p[1], p[3]) #Literal(p[1].value + p[3].value)
     elif p[2] == '-':
-        p[0] = Literal(p[1].value - p[3].value)
+        p[0] = Sub(p[1], p[3]) #Literal(p[1].value - p[3].value)
     elif p[2] == '*':
-        p[0] = Literal(p[1].value * p[3].value)
+        p[0] = Mul(p[1], p[3]) #Literal(p[1].value * p[3].value)
     elif p[2] == '/':
-        p[0] = Literal(p[1].value / p[3].value)
+        p[0] = Div(p[1], p[3]) #Literal(p[1].value / p[3].value)
     elif p[2] == '%':
-        p[0] = Literal(p[1].value % p[3].value)
+        p[0] = Mod(p[1], p[3]) #Literal(p[1].value % p[3].value)
     elif p[2] == '&&':
-        p[0] = Literal(p[1].value and p[3].value)
+        p[0] = And(p[1], p[3]) #Literal(p[1].value and p[3].value)
     elif p[2] == '||':
-        p[0] = Literal(p[1].value or p[3].value)
+        p[0] = Or(p[1], p[3]) #Literal(p[1].value or p[3].value)
     elif p[2] == '=':
-        p[0] = Literal(p[1].value == p[3].value)
+        p[0] = Equal(p[1], p[3]) #Literal(p[1].value == p[3].value)
     elif p[2] == '!=':
-        p[0] = Literal(p[1].value != p[3].value)
+        p[0] = NotEqual(p[1], p[3]) #Literal(p[1].value != p[3].value)
     elif p[2] == '<':
-        p[0] = Literal(p[1].value < p[3].value)
+        p[0] = Less(p[1], p[3]) #Literal(p[1].value < p[3].value)
     elif p[2] == '>':
-        p[0] = Literal(p[1].value > p[3].value)
+        p[0] = Greater(p[1], p[3]) #Literal(p[1].value > p[3].value)
     elif p[2] == '<=':
-        p[0] = Literal(p[1].value <= p[3].value)
+        p[0] = LessEqual(p[1], p[3]) #Literal(p[1].value <= p[3].value)
     elif p[2] == '>=':
-        p[0] = Literal(p[1].value >= p[3].value)
+        p[0] = GreaterEqual(p[1], p[3]) #Literal(p[1].value >= p[3].value)
 
 def p_expression_group(p):
     'expression : LPAREN expression RPAREN'
-    if(isinstance(p[2], Test)):
-        p[0] = Test(p[1] + p[2].p + p[3])
-    else:
-        p[0] = p[2]
+    # if(isinstance(p[2], Test)):
+    #     p[0] = Test(p[1] + p[2].p + p[3])
+    # else:
+    p[0] = p[2]
 
 def p_expression_uminus(p):
     'expression : MINUS expression %prec UMINUS'
-    if(isinstance(p[2], Test)):
-        p[0] = Test("-" + p[2].p)
-    elif(isinstance(p[2], str)):
-        p[0] = Literal(-int(p[2].value))
-    else:
-        p[0] = Literal(-p[2].value)
+    # if(isinstance(p[2], Test)):
+    #     p[0] = Test("-" + p[2].p)
+    # # elif(isinstance(p[2], str)):
+    # #     p[0] = Literal(-int(p[2].value))
+    # else:
+    p[0] = UnaryMinus(p[2])
 
 def p_expression_not(p):
     'expression : NOT expression'
-    if(isinstance(p[2], Test)):
-        p[0] = Test("!" + p[2].p)
-    else:
-        p[0] = Literal(not p[2].value)
+    # if(isinstance(p[2], Test)):
+    #     p[0] = Test("!" + p[2].p)
+    # else:
+    #    # p[0] = Literal(not p[2].value)
+    p[0] = Not(p[2])
 
 def p_expression_literal(p):
     '''expression : INTEGER
@@ -293,10 +380,10 @@ def p_expression_literal(p):
 def p_expression_name(p):
     'expression : NAME'
     if p[1] in names:
-        p[0] = names[p[1]].pointer.value
+        p[0] = Variable(p[1], None, None) #names[p[1]].pointer.value
     else:
         #p[0] = NonEvaluatedExpression(p[1], None, None, None)
-        p[0] = Test(p[1])
+        p[0] = Variable(p[1], None, None) #Test(p[1])
     # else:
     #     p[0] = Error("Undefined name '%s'" % p[1])
 
@@ -314,7 +401,8 @@ def p_function_definition(p):
     #and p_expression, gotta fix that
     #also this doesn't handle unary operators
     #and it doesn't handle multiple operands
-    for i, s in enumerate(func.body):
+   
+   # for i, s in enumerate(func.body):
         # if isinstance(s, NonEvaluatedExpression):
         #     vars = []
         #     if s.name1 in func.local_vars or s.name2 in func.local_vars:     
@@ -354,22 +442,24 @@ def p_function_definition(p):
         #             func.body[i] = Literal(vars[0].value <= vars[1].value)
         #         elif s.operator == '>=':
         #             func.body[i] = Literal(vars[0].value >= vars[1].value)
-        if isinstance(s, Test):
-            split = re.split((r"(\+|-|\*|/|%|&&|\|\||=|!=|<|>|<=|>=|!)"),s.p)
-            varss = {}
-            for a in split:
-                a = re.sub(r"\(|\)", "", a)
-                if a in func.local_vars:
-                    varss[a] = func.local_vars[a].value.value
-            s.p = re.sub(r"!", "not ", s.p)
-            s.p = re.sub(r"&&", " and ", s.p)
-            s.p = re.sub(r"\|\|", " or ", s.p)
-            s.p = re.sub(r"=", "==", s.p)
-            func.body[i] = Literal(eval(s.p, names, varss))
+        
+        
+        # if isinstance(s, Test):
+        #     split = re.split((r"(\+|-|\*|/|%|&&|\|\||=|!=|<|>|<=|>=|!)"),s.p)
+        #     varss = {}
+        #     for a in split:
+        #         a = re.sub(r"\(|\)", "", a)
+        #         if a in func.local_vars:
+        #             varss[a] = func.local_vars[a].value.value
+        #     s.p = re.sub(r"!", "not ", s.p)
+        #     s.p = re.sub(r"&&", " and ", s.p)
+        #     s.p = re.sub(r"\|\|", " or ", s.p)
+        #     s.p = re.sub(r"=", "==", s.p)
+        #     func.body[i] = Literal(eval(s.p, names, varss))
 
 
             
-    functions[p[2]] = func
+    #functions[p[2]] = func
     p[0] = func
 
 def p_function_declaration(p):
@@ -383,7 +473,8 @@ def p_parameters(p):
     params = {}
     data = list()
     if len(p) == 4:
-        data = [p[1]] + p[3]
+        print(p[3])
+        data = [p[1]] + [p[3]]
     else:
         data = [p[1]]
     params.update(data)
@@ -392,9 +483,9 @@ def p_parameters(p):
 def p_parameter(p):
     'parameter : varval NAME COLON type'
     if p[1] == 'var':
-        p[0] = (p[2], Variable(p[2], Literal(1),  p[4]))
+        p[0] = (p[2], Variable(p[2], None,  p[4]))
     else:
-        p[0] = (p[2], Value(p[2], Literal(1), p[4]))
+        p[0] = (p[2], Value(p[2], None, p[4]))
 
 def p_varval(p):
     '''varval : VAR
@@ -424,25 +515,33 @@ def p_body(p):
     else:
         p[0] = [p[1]] + p[2]
 
-def p_statement(p):
-    '''statement : expression SEMICOLON
-                 | variable_definition_in_func
-                 | value_definition_in_func'''
-    p[0] = p[1]
+# def p_statement(p):
+#     '''statement : function_definition
+#                 | function_declaration
+#                 | variable_definition
+#                 | variable_declaration
+#                 | value_definition
+#                 | value_declaration
+#                 | statement
+#                 | empty
+#                 | expression SEMICOLON
+#                 | variable_definition_in_func
+#                 | value_definition_in_func'''
+#     p[0] = p[1]
 
 
-def p_variable_definition_in_func(p):
-    '''variable_definition_in_func : VAR NAME COLON type ASSIGN expression SEMICOLON
-                                   | VAR NAME COLON type ASSIGN array SEMICOLON'''
-    p[0] = VariableDefinition(Variable(p[2], p[6], p[4]))
+# def p_variable_definition_in_func(p):
+#     '''variable_definition_in_func : VAR NAME COLON type ASSIGN expression SEMICOLON
+#                                    | VAR NAME COLON type ASSIGN array SEMICOLON'''
+#     p[0] = VariableDefinition(Variable(p[2], p[6], p[4]))
 
-def p_value_definition_in_func(p):
-    '''value_definition_in_func : VAL NAME COLON type ASSIGN expression SEMICOLON
-                                | VAL NAME COLON type ASSIGN array SEMICOLON'''
-    p[0] = ValueDefinition(Value(p[2], p[6], p[4]))
+# def p_value_definition_in_func(p):
+#     '''value_definition_in_func : VAL NAME COLON type ASSIGN expression SEMICOLON
+#                                 | VAL NAME COLON type ASSIGN array SEMICOLON'''
+#     p[0] = ValueDefinition(Value(p[2], p[6], p[4]))
 
 def p_empty(p):
-    'empty :'
+    'empty : '
     pass
 
 
@@ -459,21 +558,32 @@ def p_expression_index_access(p):
 
 parser = yacc.yacc()
 
+ast = []
 
-while True:
-    try:
-        s = input('')
-    except KeyboardInterrupt:
-        break
-    # except EOFError:
-    #     break
-    print(parser.parse(s))
+# while True:
+#     try:
+#         s = input('')
+#     except KeyboardInterrupt:
+#         print(ast)
+#         break
+#     # except EOFError:
+#     #     break
+#     print(parser.parse(s))
+#     ast.append(parser.parse(s))
+
+with open('../test/0_valid/validTest.pl', 'r') as file:
+    data = file.read()
+
+result = parser.parse(data)
+print(result)
+ast.append(result)
+
+print(ast)
 
 
 #reassign var values
 #if statements
 #while loops
-#double check statements
+#function calls
+
 #error handling
-#parameters are being initialized as 1, look into that
-    #function calls ^

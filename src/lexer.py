@@ -84,11 +84,12 @@ t_COLON = r':'
 #t_ARRAY = r'\[\s*((\d+|(\d*\.\d+)|\'(\\.|[^\'])*\'|\"(\\.|[^\"])*\")(\s*,\s*(\d+|(\d*\.\d+)|\'(\\.|[^\'])*\'|\"(\\.|[^\"])*\"))*)?\s*\]'
 
 # Ignored characters
-t_ignore = " \t"
+t_ignore = " \t\n"
 
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
+    pass
 
 def t_COMMENT(t):
     r'\#.*'
@@ -110,7 +111,7 @@ def t_INTEGER(t):
     return t
 
 def t_FUNCTION(t): 
-    r'^function'
+    r'function'
     return t
 
 def t_VAR(t):
