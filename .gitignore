@@ -1,5 +1,5 @@
-.\src\parser.out
+./src/parser.out
 
-.\src\parsetab.py
+./src/parsetab.py
 
-.\src\__pycache__\*
+./src/__pycache__/**
