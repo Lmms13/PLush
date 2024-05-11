@@ -137,7 +137,7 @@ def t_CHARTYPE(t):
     r'char'
     return t
 
-def t_BOOLEAN(t):
+def t_BOOLEANTYPE(t):
     r'boolean'
     return t
 
@@ -172,9 +172,9 @@ import ply.lex as lex # type: ignore
 lexer = lex.lex()
 
 if __name__ == '__main__':
-    lexer.input("\"asdasda \n \" \"asdasda\"")
+    lexer.input("\"asasas\"")
     while True:
         tok = lexer.token()
         if not tok: 
             break      # No more input
-        print(tok)
+        print(tok.type)
