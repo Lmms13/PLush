@@ -1,11 +1,11 @@
 
 tokens = (
-    'STRING','INTEGER','FLOAT','ARRAY','CHAR',
+    'STRING','INTEGER','FLOAT','CHAR',
     'AND','OR','NOT',
     'EQUAL','NOTEQUAL','LESS','GREATER','LESSEQUAL','GREATEREQUAL',
     'TRUE','FALSE',
-    'ASSIGN','IF','VAR','VAL','FUNCTION','COMMENT','NAME',
-    'LCURLY','RCURLY','LBRACKET','RBRACKET','SEMICOLON','LPAREN','RPAREN','COMMA','COLON','HASHTAG',
+    'ASSIGN','IF','VAR','VAL','FUNCTION','COMMENT','NAME','WHILE',
+    'LCURLY','RCURLY','LBRACKET','RBRACKET','SEMICOLON','LPAREN','RPAREN','COMMA','COLON',
     'PLUS','MINUS','TIMES','DIVIDE','PERCENT',
     'VOIDTYPE','STRINGTYPE','INTTYPE','FLOATTYPE','CHARTYPE','BOOLEANTYPE'
     )
@@ -17,6 +17,7 @@ reserved = {
     'true': 'TRUE',
     'false': 'FALSE',
     'if': 'IF',
+    'while': 'WHILE',
     'var': 'VAR',
     'val': 'VAL',
     'function': 'FUNCTION',
@@ -30,7 +31,10 @@ reserved = {
 
 # Tokens
 
-t_STRING = r'(\"(.|\n|\\)*\")'
+#t_STRING = r'(\"(.|\n|\\)*\")'
+#t_STRING = r'(\"([^"]|\n|\\)*\")'
+#t_STRING = r'"[^"]*"'
+#t_STRING = r'(\"([^\\\"]|(\\.))*\")|(\'([^\\\']|(\\.))*\')'
 
 
 
@@ -46,10 +50,11 @@ t_LESS = r'<'
 t_GREATER = r'>'
 t_LESSEQUAL = r'<='
 t_GREATEREQUAL = r'>='
-t_TRUE = r'true'
-t_FALSE = r'false'
+#t_TRUE = r'true'
+#t_FALSE = r'false'
 t_ASSIGN = r':='
 t_IF = r'if'
+t_WHILE = r'while'
 #t_VAR = r'var'
 #t_VAL = r'val'
 #t_FUNCTION = r'function'
@@ -87,11 +92,16 @@ def t_newline(t):
 
 def t_COMMENT(t):
     r'\#.*'
-    return t
+    pass
 
 def t_FLOAT(t):
     r'(\d)*\.(\d)+'
     t.value = float(t.value)
+    return t
+
+def t_STRING(t):
+    r'"[^"]*"'
+    t.value = t.value.replace("\"","")
     return t
 
 def t_INTEGER(t):
@@ -135,13 +145,20 @@ def t_VOIDTYPE(t):
     r'void'
     return t
 
+def t_TRUE(t):
+    r'true'
+    return t
+
+def t_FALSE(t):
+    r'false'
+    return t
+
 
 def t_NAME(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
     if t.value in reserved:
         return locals()["t_" + reserved[t.value]](t)
     else:
-        print(t)
         return t
 
 
@@ -155,7 +172,7 @@ import ply.lex as lex # type: ignore
 lexer = lex.lex()
 
 if __name__ == '__main__':
-    lexer.input("#[213813]\n1+1+1+1")
+    lexer.input("\"asdasda \n \" \"asdasda\"")
     while True:
         tok = lexer.token()
         if not tok: 
