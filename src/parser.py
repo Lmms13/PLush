@@ -383,20 +383,17 @@ def p_type(p):
 
 def p_body(p):
     '''body : statement body
-            | expression SEMICOLON body
             | empty'''
     if p[1] is None:
         p[0] = []
     elif len(p) == 2:
         p[0] = [p[1]]
-    elif len(p) == 4:
-        p[0] = [p[1]] + p[3]
     else:
         p[0] = [p[1]] + p[2]
 
-#can swap the expression from the one above if this doesn't work
 def p_statement(p):
-    '''statement : variable_definition_in_func
+    '''statement : expression SEMICOLON
+                 | variable_definition_in_func
                  | value_definition_in_func'''
     p[0] = p[1]
 
