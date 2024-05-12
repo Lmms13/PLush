@@ -26,7 +26,7 @@ class Literal(Expression):
 
 @dataclass
 class Array(Expression):
-    elements: list
+    elements: List[Expression]
 
 @dataclass
 class Variable(Expression):
@@ -161,7 +161,7 @@ class If(Statement):
 
 @dataclass
 class IndexAccess(Expression):
-    array: Union[Variable,Value]
+    array: str
     index: Expression
 
 @dataclass
@@ -241,23 +241,9 @@ def p_elements(p):
         p[0] = [p[1]]
 
 def p_element(p):
-    '''element : INTEGER
-               | FLOAT
-               | STRING
-               | CHAR
-               | TRUE
-               | FALSE
+    '''element : expression
                | array'''
-    if isinstance(p[1], list):
-        p[0] = p[1]
-    elif p[1].isdigit(): 
-        p[0] = int(p[1])
-    else:
-        p[0] = p[1].strip()
-
-
-
-#var
+    p[0] = p[1]
 
 def p_variable_definition(p):
     '''variable_definition : VAR NAME COLON type ASSIGN expression SEMICOLON
@@ -580,13 +566,13 @@ parser = yacc.yacc()
 #     print(parser.parse(s))
 #     ast.append(parser.parse(s))
 
-with open('../test/0_valid/maxRangeSquared.pl', 'r') as file:
+with open('../test/0_valid/validTest.pl', 'r') as file:
     data = file.read()
 
 ast = parser.parse(data)
 
 # = result
 
-#print(ast)
+print(ast)
 
 #error handling

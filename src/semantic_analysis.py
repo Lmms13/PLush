@@ -8,7 +8,7 @@ class Context:
     def __init__(self, parent=None):
         self.var_table = {}
         self.function_table = {}
-        # self.current_function = None
+        self.current_function = None
         self.parent = parent
 
     def add_var(self, var):
@@ -54,14 +54,18 @@ class Context:
 
 
 class SemanticAnalyzer:
-    def __init__(self, ast):
+    def __init__(self, ast, context=[Context()]):
         self.ast = ast
         self.errors = []
+        self.context = context
 
     def analyze(self):
         for node in self.ast:
             self.visit(node)
-        print(self.errors)
+        if self.errors:
+            print(self.errors)
+        else:
+            print("No errors found")
 
     def visit(self, node):
         method_name = 'visit_' + type(node).__name__
@@ -69,20 +73,48 @@ class SemanticAnalyzer:
         return visitor(node)
 
     def generic_visit(self, node):
-        print("generic")
-        # raise Exception('No visit_{} method'.format(type(node).__name__))
+        raise Exception('No visit_{} method'.format(type(node).__name__))
+    
+    def convert_type(self, type_string):
+        if type_string == "int":
+                return int
+        elif type_string == "float":
+                return float
+        elif type_string == "string":
+                return str
+        elif type_string == "boolean":
+                return bool
+        elif type_string == "char":
+                return str
+        elif type_string == "void":
+                return None
+        elif type_string.startswith('[') and type_string.endswith(']'):
+                return self.convert_type(type_string[1:-1])
 
     def visit_Literal(self, node):
         return(type(node.value))
 
     def visit_Array(self, node):
-        return[self.visit(element) for element in node.elements]
+        elem_type = self.visit(node.elements[0])
+        for element in node.elements:
+            if self.visit(element) != elem_type:
+                self.errors.append("All elements of an array must have be of the same type")
+                return None
+        return self.visit(elem_type)
     
     def visit_Variable(self, node):
-        print("variable", node.name)
+        if self.context[-1].get_var(node.name) is not None:
+            return self.convert_type(self.context[-1].get_var(node.name).type)
+        else:
+            self.errors.append(f"Variable {node.name} not declared")
+            return None
 
     def visit_Value(self, node):
-        print("value", node.name)
+        if self.context[-1].get_var(node.name) is not None:
+            return self.convert_type(self.context[-1].get_var(node.name).type)
+        else:
+            self.errors.append(f"Value {node.name} not declared")
+            return None
 
     def visit_Add(self, node):
         valid = [int, float]
@@ -212,50 +244,89 @@ class SemanticAnalyzer:
             return exp_type
 
     def visit_FunctionDefinition(self, node):
-        # if node.context.has_name(node.var.name):
-        #     self.errors.append(f"Variable {node.var.name} already declared")
-        # else:
-        #     node.context.add_var(node.var)
-        print("functiondef")
-        for statement in node.body:
-            self.visit(statement)
+        if self.context[-1].has_name(node.name):
+            self.errors.append(f"Function or variable with name {node.name} already declared")
+            return None 
+        else:
+            self.context[-1].add_function(node)
+            self.context.append(Context(self.context[-1]))
+
+            for arg in node.local_vars.values():
+                self.context[-1].add_var(arg)
+
+            for statement in node.body:
+                self.visit(statement)
+
+            self.context.pop()
+            return self.convert_type(node.return_type)
 
     def visit_FunctionDeclaration(self, node):
-        # if node.context.has_name(node.var.name):
-        #     self.errors.append(f"Variable {node.var.name} already declared")
-        # else:
-        #     node.context.add_var(node.var)
-        print("functiondecl")
-        for statement in node.body:
-            self.visit(statement)
+        if self.context[-1].has_name(node.name):
+            self.errors.append(f"Function or variable with name {node.name} already declared")
+            return None 
+        else:
+            node.local_vars = Context(self.context)
+            for arg in node.arguments:
+                if self.visit(arg) is None:
+                    return None
+            
+            #running the loop twice to avoid adding variables
+            #when there is a possibility that one of them is invalid
+            for arg in node.arguments:
+                node.context.add_var(arg)
+            
+            self.context.add_function(node)
+            return self.convert_type(node.return_type)
                 
     def visit_VariableDefinition(self, node):
-        # if node.context.has_name(node.var.name):
-        #     self.errors.append(f"Variable {node.var.name} already declared")
-        # else:
-        #     node.context.add_var(node.var)
-        print("var_def")
+        if self.context[-1].has_name(node.pointer.name):
+            self.errors.append(f"Function or variable with name {node.pointer.name} already declared")
+            return None 
+        elif node.pointer.type == "void":
+            self.errors.append("Variable type cannot be void")
+            return None
+        elif self.convert_type(node.pointer.type) != self.visit(node.pointer.value):
+            self.errors.append("Incompatible types on variable definition of {node.pointer.name}")
+            return None
+        else:
+            self.context.add_var(node.pointer)
+            return self.visit(node.pointer)
     
     def visit_VariableDeclaration(self, node):
-        # if node.context.has_name(node.var.name):
-        #     self.errors.append(f"Variable {node.var.name} already declared")
-        # else:
-        #     node.context.add_var(node.var)
-        print("var_decl")
+        if self.context[-1].has_name(node.name):
+            self.errors.append(f"Function or variable with name {node.pointer.name} already declared")
+            return None 
+        elif node.type == "void":
+            self.errors.append("Variable type cannot be void")
+            return None
+        else:
+            self.context.add_var(node)
+            return self.convert_type(node.type)
 
     def visit_ValueDefinition(self, node):
-        # if node.context.has_name(node.var.name):
-        #     self.errors.append(f"Variable {node.var.name} already declared")
-        # else:
-        #     node.context.add_var(node.var)
-        print("val_def")
+        if self.context[-1].has_name(node.pointer.name):
+            self.errors.append(f"Function or variable with name {node.pointer.name} already declared")
+            return None 
+        elif node.pointer.type == "void":
+            self.errors.append("Value type cannot be void")
+            return None
+        elif self.convert_type(node.pointer.type) != self.visit(node.pointer.value):
+            self.errors.append("Incompatible types on value definition of {node.pointer.name}")
+            return None
+        else:
+            self.context.add_var(node.pointer)
+            return self.visit(node.pointer)
 
     def visit_ValueDeclaration(self, node):
-        # if node.context.has_name(node.var.name):
-        #     self.errors.append(f"Variable {node.var.name} already declared")
-        # else:
-        #     node.context.add_var(node.var)
-        print("val_decl")
+        if self.context.has_name(node.name):
+            self.errors.append(f"Function or variable with name {node.pointer.name} already declared")
+            return None 
+        elif node.type == "void":
+            self.errors.append("Value type cannot be void")
+            return None
+        else:
+            self.context.add_var(node)
+            return self.convert_type(node.type)
 
     def visit_Error(self, node):
         self.errors.append(node.message)
@@ -279,31 +350,30 @@ class SemanticAnalyzer:
             for statement in node.else_block:
                 self.visit(statement)
 
-    def visit_IndexAcess(self, node):
-        array = self.visit(node.array)
+    def visit_IndexAccess(self, node):
+        #array is not a list, it's a name, rewrite this, it needs context
+        #array = self.visit(node.array)
         index = self.visit(node.index)
-        if type(array) != list:
-            self.errors.append("Trying to index a non-array")
+        if self.context[-1].get_var(node.array) is None:
+            self.errors.append("Trying to index a non-existing array")
             return None
         elif type(index) != int:
             self.errors.append("Index must be an integer")
             return None
         else:
-            elem_type = self.visit(array[0])
-            for element in array:
-                if self.visit(element) != elem_type:
-                    self.errors.append("All elements of an array must have be of the same type")
-                    return None
-            return self.visit(array[index])
+            return self.context[-1].get_var(node.array).type
 
     def visit_ReturnOrReassign(self, node):
-        print("return_or_reassign")
-        self.visit(node.value)
+        # print("return_or_reassign")
+        # self.visit(node.value)
+        #TODO
+        print("unimplemented")
 
     def visit_FunctionCall(self, node):
-        print("functioncall", node.name)
-        for arg in node.arguments:
-            self.visit(arg)
+        # for arg in node.arguments:
+        #     self.visit(arg)
+        #TODO
+        print("unimplemented")
 
     
 
@@ -319,6 +389,12 @@ class SemanticAnalyzer:
     
 # ast = [VariableDeclaration(var.name, var.value), VariableDeclaration(var.name, var.value)]
 # print(ast)
-fl = 2.2
-ast = [Add(Literal(1), Literal(2)), And(Literal(True), Literal(False)), Add(Literal("2"), Literal("2"))]
+# ast = [Add(Literal(1), Literal(2)), And(Literal(True), Literal(False)), Add(Literal("2"), Literal("2"))]
 SemanticAnalyzer(ast).analyze()
+
+#if statements
+#while statements
+#function calls
+#return or reassign statements
+#function defs
+#function decs
