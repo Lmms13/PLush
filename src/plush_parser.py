@@ -160,13 +160,13 @@ class If(Statement):
     else_block: List[Statement]
 
 @dataclass
-class IndexAcess(Expression):
+class IndexAccess(Expression):
     array: Union[Variable,Value]
     index: Expression
 
 @dataclass
 class ReturnOrReassign(Statement):
-    name: Union[str,IndexAcess]
+    name: Union[str,IndexAccess]
     value: Expression
 
 @dataclass
@@ -463,7 +463,7 @@ def p_return_or_reassign_statement(p):
     if len(p) == 5:
         p[0] = ReturnOrReassign(p[1], p[3])
     else:
-        p[0] = ReturnOrReassign(IndexAcess(p[1], p[3]), p[6])
+        p[0] = ReturnOrReassign(IndexAccess(p[1], p[3]), p[6])
 
 
 def p_parameters(p):
@@ -562,12 +562,12 @@ def p_empty(p):
 
 def p_expression_index_access(p):
     'expression : NAME LBRACKET expression RBRACKET'
-    p[0] = IndexAcess(p[1], p[3])
+    p[0] = IndexAccess(p[1], p[3])
 
 
 parser = yacc.yacc()
 
-ast = []
+# ast = []
 
 # while True:
 #     try:
@@ -583,8 +583,9 @@ ast = []
 with open('../test/0_valid/maxRangeSquared.pl', 'r') as file:
     data = file.read()
 
-result = parser.parse(data)
-ast.append(result)
+ast = parser.parse(data)
+
+# = result
 
 #print(ast)
 
