@@ -1,6 +1,7 @@
 #declaration of function for FFI
 function array_length(val a: [int]) : int;
 
+
 function print_int_array(val arr: [int]);
 
 
@@ -23,10 +24,6 @@ function sortArray(var a: [int]) : [int]{
 
 
 function main(val args:[string]) {
-	#I don't know how to initialize an array in this language since there is no example available.
-	#I assume that it's either something like this or maybe we also need to specify the length of 
-	#the array given we should also be able to initialize an empty array
-
 	var a : [int] := [6,8,4,2,4,7,1,10,8,4,9,4,3,5,2,1];
 	val result : [int] := sortArray(a);
 	print_int_array(result);

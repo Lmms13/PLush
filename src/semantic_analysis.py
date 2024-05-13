@@ -1,16 +1,46 @@
 from plush_parser import *
 import sys
+import time
+
+files = ['../test/0_valid/validTest.pl',
+         '../test/0_valid/countOccurrences.pl',
+         '../test/0_valid/isPalindrome.pl',
+         '../test/0_valid/maxRangeSquared.pl',
+         '../test/0_valid/sortArray.pl',
+         '../test/1_lexical_error/countOccurrences1.pl',
+         '../test/1_lexical_error/countOccurrences2.pl',
+         '../test/1_lexical_error/isPalindrome1.pl',
+         '../test/1_lexical_error/isPalindrome2.pl',
+         '../test/1_lexical_error/maxRangeSquared1.pl',
+         '../test/1_lexical_error/maxRangeSquared2.pl',
+         '../test/1_lexical_error/sortArray1.pl',
+         '../test/2_syntactic_error/countOccurrences1.pl',
+         '../test/2_syntactic_error/countOccurrences2.pl',
+         '../test/2_syntactic_error/isPalindrome1.pl',
+         '../test/2_syntactic_error/maxRangeSquared1.pl',
+         '../test/2_syntactic_error/sortArray1.pl',
+         '../test/2_syntactic_error/sortArray2.pl',
+         '../test/3_semantic_error/countOccurrences1.pl',
+         '../test/3_semantic_error/isPalindrome1.pl',
+         '../test/3_semantic_error/isPalindrome2.pl',
+         '../test/3_semantic_error/maxRangeSquared1.pl',
+         '../test/3_semantic_error/sortArray1.pl',
+         '../test/3_semantic_error/sortArray2.pl']
 
 #parsing data using plush_parser.py--------------------------
 if len(sys.argv) < 2:
-    filepath = '../test/0_valid/validTest.pl'
+    filepath = '../test/3_semantic_error/sortArray1.pl'
 else:
     filepath = sys.argv[1]
 
+#for filepath in files:
 with open(filepath, 'r') as file:
     data = file.read()
 
 ast = parser.parse(data)
+if(ast is None):
+    ast = []
+#time.sleep(2)
 #------------------------------------------------------------
 
 class Context:
