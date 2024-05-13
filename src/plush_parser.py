@@ -37,6 +37,10 @@ class Value(Expression):
     type: str
 
 @dataclass
+class Error(Expression):
+    message: str
+
+@dataclass
 class Add(Expression):
     left: Expression
     right: Expression
@@ -146,10 +150,6 @@ class ValueDefinition(Definition):
 class ValueDeclaration(Declaration):
     name: str
     type: str
-
-@dataclass
-class Error(Expression):
-    message: str
 
 @dataclass
 class While(Statement):
@@ -332,11 +332,17 @@ def p_expression_name(p):
 
 def p_function_definition(p):
     '''function_definition : FUNCTION NAME LPAREN parameters RPAREN COLON type LCURLY body RCURLY
-                           | FUNCTION NAME LPAREN parameters RPAREN LCURLY body RCURLY'''
+                           | FUNCTION NAME LPAREN parameters RPAREN LCURLY body RCURLY
+                           | FUNCTION NAME LPAREN RPAREN COLON type LCURLY body RCURLY
+                           | FUNCTION NAME LPAREN RPAREN LCURLY body RCURLY'''
     if len(p) == 11:
         func = FunctionDefinition(p[2], p[4], len(p[4]), p[7], p[9])
-    else:
+    elif len(p) == 10:
+        func = FunctionDefinition(p[2], [], 0, p[6], p[8])
+    elif len(p) == 9:
         func = FunctionDefinition(p[2], p[4], len(p[4]), 'void', p[7])
+    else:
+        func = FunctionDefinition(p[2], [], 0, 'void', p[6])
     for s in func.body:
         if isinstance(s, VariableDefinition) or isinstance(s, ValueDefinition):
             func.local_vars[s.pointer.name] = s.pointer
@@ -345,11 +351,18 @@ def p_function_definition(p):
 
 def p_function_declaration(p):
     '''function_declaration : FUNCTION NAME LPAREN parameters RPAREN COLON type SEMICOLON
-                            | FUNCTION NAME LPAREN parameters RPAREN SEMICOLON'''
+                            | FUNCTION NAME LPAREN parameters RPAREN SEMICOLON
+                            | FUNCTION NAME LPAREN RPAREN COLON type SEMICOLON
+                            | FUNCTION NAME LPAREN RPAREN SEMICOLON'''
+    
     if len(p) == 9:
         p[0] = FunctionDeclaration(p[2], p[4], len(p[4]), p[7])
-    else:
+    elif len(p) == 8:
+        p[0] = FunctionDeclaration(p[2], [], 0, p[6])
+    elif len(p) == 7:
         p[0] = FunctionDeclaration(p[2], p[4], len(p[4]), 'void')
+    else:
+        p[0] = FunctionDeclaration(p[2], [], 0, 'void')
 
 def p_return_or_reassign_statement(p):
     '''return_or_reassign_statement : NAME ASSIGN expression SEMICOLON
@@ -362,13 +375,16 @@ def p_return_or_reassign_statement(p):
 
 def p_parameters(p):
     '''parameters : parameter COMMA parameters
-                  | parameter
-                  | empty'''
+                  | parameter'''
     params = {}
     if p[1] is not None:
         params.update(dict([p[1]]))
         if len(p) == 4:
-            params.update(p[3])
+            if p[1][0] in p[3]:
+                err_message = f"Duplicate parameter with name {p[1][0]} in function definition"
+                raise ValueError(err_message)
+            else:
+                params.update(p[3])
     p[0] = params 
 
 def p_parameter(p):
@@ -419,13 +435,16 @@ def p_body(p):
         p[0] = [p[1]] + p[2]
 
 def p_expression_function_call(p):
-    'expression : NAME LPAREN arguments RPAREN'
-    p[0] = FunctionCall(p[1], p[3])
+    '''expression : NAME LPAREN arguments RPAREN
+                  | NAME LPAREN RPAREN'''
+    if len(p) == 5:
+        p[0] = FunctionCall(p[1], p[3])
+    else:
+        p[0] = FunctionCall(p[1], [])
 
 def p_arguments(p):
     '''arguments : argument COMMA arguments
-                 | argument
-                 | empty'''
+                 | argument'''
     if p[1] is not None:
         if len(p) == 4:
             p[0] = [p[1]] + p[3]
@@ -467,3 +486,5 @@ parser = yacc.yacc()
 #     data = file.read()
 
 # ast = parser.parse(data)
+
+# print(ast)

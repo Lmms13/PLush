@@ -3,7 +3,7 @@ import sys
 
 #parsing data using plush_parser.py--------------------------
 if len(sys.argv) < 2:
-    filepath = '../test/0_valid/maxRangeSquared.pl'
+    filepath = '../test/0_valid/validTest.pl'
 else:
     filepath = sys.argv[1]
 
@@ -291,12 +291,14 @@ class SemanticAnalyzer:
             self.context.append(Context(self.context[-1]))
             self.context[-1].add_function(node)
             
-            for arg in list(node.local_vars.values())[:node.arg_num]:
-                if self.context[-1].has_name(arg.name):
-                    self.errors.append(f"Function arguments must have unique names, {arg.name} is repeated")
-                    return None
-                else:
-                    self.context[-1].add_var(arg)
+            if node.arg_num > 0:
+                for arg in list(node.local_vars.values())[:node.arg_num]:
+                    # print(arg.name)
+                    if self.context[-1].has_name(arg.name):
+                        self.errors.append(f"Function arguments must have unique names, {arg.name} is repeated")
+                        return None
+                    else:
+                        self.context[-1].add_var(arg)
 
             for statement in node.body:
                 self.visit(statement)
