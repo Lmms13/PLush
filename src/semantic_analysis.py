@@ -41,10 +41,10 @@ class Context:
     
     def has_name(self, name):
         local_has_name = name in self.var_table or name in self.function_table
-        if not local_has_name and self.parent is not None:
-            return self.parent.has_name(name)
-        else:
-            return local_has_name
+        # if not local_has_name and self.parent is not None:
+        #     return self.parent.has_name(name)
+        # else:
+        return local_has_name
     
     def set_var(self, name, value):
         if name in self.var_table:
@@ -245,14 +245,18 @@ class SemanticAnalyzer:
 
     def visit_FunctionDefinition(self, node):
         if self.context[-1].has_name(node.name):
-            self.errors.append(f"Function or variable with name {node.name} already declared")
+            self.errors.append(f"Function or variable with name {node.name} already declared in current scope")
             return None 
         else:
             self.context[-1].add_function(node)
             self.context.append(Context(self.context[-1]))
 
             for arg in node.local_vars.values():
-                self.context[-1].add_var(arg)
+                if self.context[-1].has_name(arg.name):
+                    self.errors.append(f"Function arguments must have unique names, {arg.name} is repeated")
+                    return None
+                else:
+                    self.context[-1].add_var(arg)
 
             for statement in node.body:
                 self.visit(statement)
@@ -262,31 +266,21 @@ class SemanticAnalyzer:
 
     def visit_FunctionDeclaration(self, node):
         if self.context[-1].has_name(node.name):
-            self.errors.append(f"Function or variable with name {node.name} already declared")
+            self.errors.append(f"Function or variable with name {node.name} already declared in current scope")
             return None 
         else:
-            node.local_vars = Context(self.context)
-            for arg in node.arguments:
-                if self.visit(arg) is None:
-                    return None
-            
-            #running the loop twice to avoid adding variables
-            #when there is a possibility that one of them is invalid
-            for arg in node.arguments:
-                node.context.add_var(arg)
-            
-            self.context.add_function(node)
+            self.context[-1].add_function(node)
             return self.convert_type(node.return_type)
                 
     def visit_VariableDefinition(self, node):
         if self.context[-1].has_name(node.pointer.name):
-            self.errors.append(f"Function or variable with name {node.pointer.name} already declared")
+            self.errors.append(f"Function or variable with name {node.pointer.name} already declared in current scope")
             return None 
         elif node.pointer.type == "void":
             self.errors.append("Variable type cannot be void")
             return None
         elif self.convert_type(node.pointer.type) != self.visit(node.pointer.value):
-            self.errors.append("Incompatible types on variable definition of {node.pointer.name}")
+            self.errors.append(f"Incompatible types on variable definition of {node.pointer.name}")
             return None
         else:
             self.context.add_var(node.pointer)
@@ -294,7 +288,7 @@ class SemanticAnalyzer:
     
     def visit_VariableDeclaration(self, node):
         if self.context[-1].has_name(node.name):
-            self.errors.append(f"Function or variable with name {node.pointer.name} already declared")
+            self.errors.append(f"Function or variable with name {node.name} already declared in current scope")
             return None 
         elif node.type == "void":
             self.errors.append("Variable type cannot be void")
@@ -305,13 +299,13 @@ class SemanticAnalyzer:
 
     def visit_ValueDefinition(self, node):
         if self.context[-1].has_name(node.pointer.name):
-            self.errors.append(f"Function or variable with name {node.pointer.name} already declared")
+            self.errors.append(f"Function or variable with name {node.pointer.name} already declared in current scope")
             return None 
         elif node.pointer.type == "void":
             self.errors.append("Value type cannot be void")
             return None
         elif self.convert_type(node.pointer.type) != self.visit(node.pointer.value):
-            self.errors.append("Incompatible types on value definition of {node.pointer.name}")
+            self.errors.append(f"Incompatible types on value definition of {node.pointer.name}")
             return None
         else:
             self.context.add_var(node.pointer)
@@ -319,7 +313,7 @@ class SemanticAnalyzer:
 
     def visit_ValueDeclaration(self, node):
         if self.context.has_name(node.name):
-            self.errors.append(f"Function or variable with name {node.pointer.name} already declared")
+            self.errors.append(f"Function or variable with name {node.name} already declared in current scope")
             return None 
         elif node.type == "void":
             self.errors.append("Value type cannot be void")
@@ -351,17 +345,18 @@ class SemanticAnalyzer:
                 self.visit(statement)
 
     def visit_IndexAccess(self, node):
-        #array is not a list, it's a name, rewrite this, it needs context
-        #array = self.visit(node.array)
         index = self.visit(node.index)
         if self.context[-1].get_var(node.array) is None:
             self.errors.append("Trying to index a non-existing array")
+            return None
+        elif self.convert_type(self.context[-1].get_var(node.array).type) != list:
+            self.errors.append("Trying to index a non-array variable")
             return None
         elif type(index) != int:
             self.errors.append("Index must be an integer")
             return None
         else:
-            return self.context[-1].get_var(node.array).type
+            return self.visit(self.context[-1].get_var(node.array).elements[index])
 
     def visit_ReturnOrReassign(self, node):
         # print("return_or_reassign")
@@ -396,5 +391,3 @@ SemanticAnalyzer(ast).analyze()
 #while statements
 #function calls
 #return or reassign statements
-#function defs
-#function decs
