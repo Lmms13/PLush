@@ -171,14 +171,12 @@ def t_error(t):
 import ply.lex as lex # type: ignore
 lexer = lex.lex()
 
-if __name__ == '__main__':
-    filepath = '../test/0_valid/validTest.pl'
-    with open(filepath, 'r') as file:
-        for line in file:
-            lexer.input(line)
-            while True:
-                tok = lexer.token()
-                if not tok: 
-                    break  # No more input
+def test_lexer(data: str):
+    lexer.input(data)
+    while True:
+        tok = lexer.token()
+        if not tok: 
+            break  # No more input
     if not err:
         print("All tokens are valid")
+    return err
