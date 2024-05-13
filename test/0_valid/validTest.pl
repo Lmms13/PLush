@@ -13,6 +13,6 @@ function countOccurrences(val n: int, val a: [int]) : int {
 }
 
 function main(val args:[string]) {
-	val result : int := maxRangeSquared(actual_min, actual_max);
+	val result : int := countOccurrences(1, [1,2,3]);
 	print_int(result);
 }

@@ -1,3 +1,11 @@
+#declaration of function for FFI
+function string_length(val str: string) : int;
+
+#declaration of function for FFI
+function string_get_char_at(val str: string, val index: int) : char;
+
+function print_int(val str: int);
+
 function isPalindrome(val str: string) : int {
     val len: int := string_length(str);
     var i : int := 0;
@@ -24,13 +32,6 @@ function isPalindrome(val str: string) : int {
 # 	} 
 # 	isPalindrome := true;
 # }
-
-#declaration of function for FFI
-function string_length(val str: string) : int;
-
-#declaration of function for FFI
-function string_get_char_at(val str: string, val index: int) : string;
-
 
 function main(val args:[string]) {
 	val str : string := "racecar"; 

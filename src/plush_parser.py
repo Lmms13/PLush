@@ -3,10 +3,6 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Union,List,Dict
 import ply.yacc as yacc # type: ignore
-import re
-
-
-#statements
 
 class Expression(ABC):
     pass
@@ -117,6 +113,7 @@ class UnaryMinus(Expression):
 class FunctionDefinition(Definition):
     name: str
     local_vars: Dict[str, Union[Variable, Value]]
+    arg_num: int
     return_type: str
     body: List[Statement]
 
@@ -124,6 +121,7 @@ class FunctionDefinition(Definition):
 class FunctionDeclaration(Declaration):
     name: str
     local_vars: Dict[str, Union[Variable, Value]]
+    arg_num: int
     return_type: str
 
 @dataclass
@@ -161,7 +159,7 @@ class If(Statement):
 
 @dataclass
 class IndexAccess(Expression):
-    array: str
+    name: str
     index: Expression
 
 @dataclass
@@ -173,24 +171,6 @@ class ReturnOrReassign(Statement):
 class FunctionCall(Expression):
     name: str
     arguments: List[Expression]
-
-# @dataclass
-# class NonEvaluatedExpression(Expression):
-#     name1: str
-#     name2: str
-#     value: Union[Literal,Array]
-#     operator: str
-
-# @dataclass
-# class Test(Expression):
-#     p: str
-
-names = { }
-
-# functions = {}
-
-# curr_func = []
-
 
 start = 'program'
 
@@ -278,26 +258,7 @@ def p_expression_binop(p):
                     | expression GREATER expression
                     | expression LESSEQUAL expression
                     | expression GREATEREQUAL expression'''
-    
-    # if(isinstance(p[1], NonEvaluatedExpression) or isinstance(p[3], NonEvaluatedExpression)):
-    #     if(isinstance(p[1], NonEvaluatedExpression) and not isinstance(p[3], NonEvaluatedExpression)):
-    #         p[0] = NonEvaluatedExpression(p[1].name1, None, p[3].value, p[2])
-    #     elif(isinstance(p[3], NonEvaluatedExpression) and not isinstance(p[1], NonEvaluatedExpression)):
-    #         p[0] = NonEvaluatedExpression(None, p[1].name1, p[1].value, p[2])
-    #     else:
-    #         p[0] = NonEvaluatedExpression(p[1].name1, p[3].name1 , None, p[2])
-   
-    # if(isinstance(p[1], Test) or isinstance(p[3], Test)):
-    #     if(isinstance(p[1], Test) and not isinstance(p[3], Test)):
-    #         p[0] = Test(p[1].p + p[2] + str(p[3].value))
-    #     elif(isinstance(p[3], Test) and not isinstance(p[1], Test)):
-    #         p[0] = Test(str(p[1].value) + p[2] + p[3].p)
-    #     else:
-    #         p[0] = Test(p[1].p + p[2] + p[3].p)
-            
-        
-    # elif type(p[1].value) == str or type(p[3].value) == str:
-    #     p[0] = Error("Unsupported operation")
+
     if p[2] == '+':
         p[0] = Add(p[1], p[3])
     elif p[2] == '-':
@@ -358,90 +319,29 @@ def p_expression_literal(p):
 
 def p_expression_name(p):
     'expression : NAME'
-    if p[1] in names:
-        p[0] = Variable(p[1], None, None)
-    else:
-        p[0] = Variable(p[1], None, None)
+    p[0] = Variable(p[1], None, None)
 
 
 def p_function_definition(p):
     '''function_definition : FUNCTION NAME LPAREN parameters RPAREN COLON type LCURLY body RCURLY
                            | FUNCTION NAME LPAREN parameters RPAREN LCURLY body RCURLY'''
     if len(p) == 11:
-        func = FunctionDefinition(p[2], p[4], p[7], p[9])
+        func = FunctionDefinition(p[2], p[4], len(p[4]), p[7], p[9])
     else:
-        func = FunctionDefinition(p[2], p[4], 'void', p[7])
+        func = FunctionDefinition(p[2], p[4], len(p[4]), 'void', p[7])
     for s in func.body:
         if isinstance(s, VariableDefinition) or isinstance(s, ValueDefinition):
             func.local_vars[s.pointer.name] = s.pointer
-   
-   # for i, s in enumerate(func.body):
-        # if isinstance(s, NonEvaluatedExpression):
-        #     vars = []
-        #     if s.name1 in func.local_vars or s.name2 in func.local_vars:     
-        #         if(s.name1 in func.local_vars and s.name2 not in func.local_vars):
-        #             vars += [func.local_vars[s.name1].value]
-        #             vars += [s.value]
-        #         elif(s.name2 in func.local_vars and s.name1 not in func.local_vars):
-        #             vars += [func.local_vars[s.name2].value]
-        #             vars += [s.value]
-        #         else:
-        #             vars += [func.local_vars[s.name1].value]
-        #             vars += [func.local_vars[s.name2].value]
 
-        #         if s.operator == '+':
-        #             func.body[i] = Literal(vars[0].value + vars[1].value)
-        #         elif s.operator == '-':
-        #             func.body[i] = Literal(vars[0].value - vars[1].value)
-        #         elif s.operator == '*':
-        #             func.body[i] = Literal(vars[0].value * vars[1].value)
-        #         elif s.operator == '/':
-        #             func.body[i] = Literal(vars[0].value / vars[1].value)
-        #         elif s.operator == '%':
-        #             func.body[i] = Literal(vars[0].value % vars[1].value)
-        #         elif s.operator == '&&':
-        #             func.body[i] = Literal(vars[0].value and vars[1].value)
-        #         elif s.operator == '||':
-        #             func.body[i] = Literal(vars[0].value or vars[1].value)
-        #         elif s.operator == '=':
-        #             func.body[i] = Literal(vars[0].value == vars[1].value)
-        #         elif s.operator == '!=':
-        #             func.body[i] = Literal(vars[0].value != vars[1].value)
-        #         elif s.operator == '<':
-        #             func.body[i] = Literal(vars[0].value < vars[1].value)
-        #         elif s.operator == '>':
-        #             func.body[i] = Literal(vars[0].value > vars[1].value)
-        #         elif s.operator == '<=':
-        #             func.body[i] = Literal(vars[0].value <= vars[1].value)
-        #         elif s.operator == '>=':
-        #             func.body[i] = Literal(vars[0].value >= vars[1].value)
-        
-        
-        # if isinstance(s, Test):
-        #     split = re.split((r"(\+|-|\*|/|%|&&|\|\||=|!=|<|>|<=|>=|!)"),s.p)
-        #     varss = {}
-        #     for a in split:
-        #         a = re.sub(r"\(|\)", "", a)
-        #         if a in func.local_vars:
-        #             varss[a] = func.local_vars[a].value.value
-        #     s.p = re.sub(r"!", "not ", s.p)
-        #     s.p = re.sub(r"&&", " and ", s.p)
-        #     s.p = re.sub(r"\|\|", " or ", s.p)
-        #     s.p = re.sub(r"=", "==", s.p)
-        #     func.body[i] = Literal(eval(s.p, names, varss))
-
-
-            
-    #functions[p[2]] = func
     p[0] = func
 
 def p_function_declaration(p):
     '''function_declaration : FUNCTION NAME LPAREN parameters RPAREN COLON type SEMICOLON
                             | FUNCTION NAME LPAREN parameters RPAREN SEMICOLON'''
     if len(p) == 9:
-        p[0] = FunctionDeclaration(p[2], p[4], p[7])
+        p[0] = FunctionDeclaration(p[2], p[4], len(p[4]), p[7])
     else:
-        p[0] = FunctionDeclaration(p[2], p[4], 'void')
+        p[0] = FunctionDeclaration(p[2], p[4], len(p[4]), 'void')
 
 def p_return_or_reassign_statement(p):
     '''return_or_reassign_statement : NAME ASSIGN expression SEMICOLON
@@ -527,7 +427,8 @@ def p_arguments(p):
         p[0] = []
 
 def p_argument(p):
-    'argument : expression'
+    '''argument : expression
+                | array'''
     p[0] = p[1]
 
 def p_if_statement(p):
@@ -550,29 +451,4 @@ def p_expression_index_access(p):
     'expression : NAME LBRACKET expression RBRACKET'
     p[0] = IndexAccess(p[1], p[3])
 
-
 parser = yacc.yacc()
-
-# ast = []
-
-# while True:
-#     try:
-#         s = input('')
-#     except KeyboardInterrupt:
-#         print(ast)
-#         break
-#     # except EOFError:
-#     #     break
-#     print(parser.parse(s))
-#     ast.append(parser.parse(s))
-
-with open('../test/0_valid/validTest.pl', 'r') as file:
-    data = file.read()
-
-ast = parser.parse(data)
-
-# = result
-
-print(ast)
-
-#error handling

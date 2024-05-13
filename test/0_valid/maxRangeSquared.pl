@@ -12,6 +12,7 @@ function maxRangeSquared(var mi:int, val ma:int) : int {
 	maxRangeSquared := current_max; # This line returns the current max!
 }
 
+function print_int(val str: int);
 
 function main(val args:[string]) {
 	val result : int := maxRangeSquared(actual_min, actual_max);
