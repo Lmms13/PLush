@@ -1,4 +1,3 @@
-
 tokens = (
     'STRING','INTEGER','FLOAT','CHAR',
     'AND','OR','NOT',
@@ -30,17 +29,6 @@ reserved = {
     'boolean': 'BOOLEANTYPE'
 }
 
-# Tokens
-
-#t_STRING = r'(\"(.|\n|\\)*\")'
-#t_STRING = r'(\"([^"]|\n|\\)*\")'
-#t_STRING = r'"[^"]*"'
-#t_STRING = r'(\"([^\\\"]|(\\.))*\")|(\'([^\\\']|(\\.))*\')'
-
-
-
-#t_INTEGER = r'\d(\_|\d)*\d'
-#t_FLOAT = r'(\d)*\.(\d)+'
 t_CHAR = r'(\'\d\'|\"\d\")'
 t_AND = r'&&'
 t_OR = r'\|\|'
@@ -51,15 +39,7 @@ t_LESS = r'<'
 t_GREATER = r'>'
 t_LESSEQUAL = r'<='
 t_GREATEREQUAL = r'>='
-#t_TRUE = r'true'
-#t_FALSE = r'false'
 t_ASSIGN = r':='
-# t_IF = r'if'
-# t_ELSE = r'else'
-# t_WHILE = r'while'
-#t_VAR = r'var'
-#t_VAL = r'val'
-#t_FUNCTION = r'function'
 t_LCURLY = r'{'
 t_RCURLY = r'}'
 t_LBRACKET = r'\['
@@ -74,18 +54,7 @@ t_DIVIDE = r'/'
 t_PERCENT = r'%'
 t_COMMA = r','
 t_COLON = r':'
-#t_COMMENT = r'\#.*$'
-#t_NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
-#t_HASHTAG = r'\#'
-# t_VOIDTYPE= r'void'
-# t_STRINGTYPE = r'string'
-# t_INTTYPE = r'int'
-# t_FLOATTYPE = r'float'
-# t_CHARTYPE = r'char'
-# t_BOOLEANTYPE = r'boolean'
-#t_ARRAY = r'\[\s*((\d+|(\d*\.\d+)|\'(\\.|[^\'])*\'|\"(\\.|[^\"])*\")(\s*,\s*(\d+|(\d*\.\d+)|\'(\\.|[^\'])*\'|\"(\\.|[^\"])*\"))*)?\s*\]'
 
-# Ignored characters
 t_ignore = " \t\n"
 
 def t_newline(t):
@@ -189,7 +158,11 @@ def t_WHILE(t):
     t.type = 'WHILE'
     return t
 
+err = False
+
 def t_error(t):
+    global err
+    err = True
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
@@ -198,9 +171,13 @@ import ply.lex as lex # type: ignore
 lexer = lex.lex()
 
 if __name__ == '__main__':
-    lexer.input("function string_get_char_at(val str: string, val index: int) : str;")
-    while True:
-        tok = lexer.token()
-        if not tok: 
-            break      # No more input
-        print(tok.type)
+    filepath = '../test/1_lexical_error/countOccurrences1.pl'
+    with open(filepath, 'r') as file:
+        for line in file:
+            lexer.input(line)
+            while True:
+                tok = lexer.token()
+                if not tok: 
+                    break  # No more input
+    if not err:
+        print("All tokens are valid")

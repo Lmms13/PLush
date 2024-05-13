@@ -2,15 +2,10 @@ from plush_parser import *
 import sys
 
 #parsing data using plush_parser.py--------------------------
-#'../test/0_valid/sortArray.pl'
-
-# Check if a command-line argument was provided
 if len(sys.argv) < 2:
-    print("Please provide a file path as a command-line argument.")
-    sys.exit(1)
-
-filepath = sys.argv[1]
-#filepath = '../test/0_valid/sortArray.pl'
+    filepath = '../test/0_valid/countOccurrences.pl'
+else:
+    filepath = sys.argv[1]
 
 with open(filepath, 'r') as file:
     data = file.read()

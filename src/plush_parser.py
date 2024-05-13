@@ -452,3 +452,10 @@ def p_expression_index_access(p):
     p[0] = IndexAccess(p[1], p[3])
 
 parser = yacc.yacc()
+
+# filepath = '../test/3_semantic_error/countOccurrences1.pl'
+
+# with open(filepath, 'r') as file:
+#     data = file.read()
+
+# ast = parser.parse(data)

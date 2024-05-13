@@ -1,4 +1,3 @@
-
 function countOccurrences(val n: int, val a: [int]) : int {
 	val len : int := array_length(a);
 	var i : int := 0;
