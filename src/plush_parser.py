@@ -62,6 +62,11 @@ class Mod(Expression):
     right: Expression
 
 @dataclass
+class Power(Expression):
+    left: Expression
+    right: Expression
+
+@dataclass
 class And(Expression):
     left: Expression
     right: Expression
@@ -257,7 +262,8 @@ def p_expression_binop(p):
                     | expression LESS expression
                     | expression GREATER expression
                     | expression LESSEQUAL expression
-                    | expression GREATEREQUAL expression'''
+                    | expression GREATEREQUAL expression
+                    | expression POWER expression'''
 
     if p[2] == '+':
         p[0] = Add(p[1], p[3])
@@ -269,6 +275,8 @@ def p_expression_binop(p):
         p[0] = Div(p[1], p[3])
     elif p[2] == '%':
         p[0] = Mod(p[1], p[3])
+    elif p[2] == '^':
+        p[0] = Power(p[1], p[3])
     elif p[2] == '&&':
         p[0] = And(p[1], p[3])
     elif p[2] == '||':
@@ -453,7 +461,7 @@ def p_expression_index_access(p):
 
 parser = yacc.yacc()
 
-# filepath = '../test/3_semantic_error/countOccurrences1.pl'
+# filepath = '../test/0_valid/validTest.pl'
 
 # with open(filepath, 'r') as file:
 #     data = file.read()

@@ -3,7 +3,7 @@ import sys
 
 #parsing data using plush_parser.py--------------------------
 if len(sys.argv) < 2:
-    filepath = '../test/3_semantic_error/isPalindrome2.pl'
+    filepath = '../test/0_valid/maxRangeSquared.pl'
 else:
     filepath = sys.argv[1]
 
@@ -71,7 +71,7 @@ class SemanticAnalyzer:
         if self.errors:
             print("ERRORS:",self.errors)
         else:
-            print("No errors found")
+            print("No semantic errors found")
 
 
     def visit(self, node):
@@ -179,6 +179,17 @@ class SemanticAnalyzer:
             return None
         else:
             return int
+        
+        
+    def visit_Power(self, node):
+        valid = [int, float]
+        if self.visit(node.left) not in valid or self.visit(node.right) not in valid:
+            self.errors.append("Incompatible types on power")
+            return None
+        elif self.visit(node.left) == int and self.visit(node.right) == int:
+            return int
+        else:
+            return float
 
 
     def visit_And(self, node):

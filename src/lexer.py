@@ -5,7 +5,7 @@ tokens = (
     'TRUE','FALSE',
     'ASSIGN','IF','ELSE','VAR','VAL','FUNCTION','COMMENT','NAME','WHILE',
     'LCURLY','RCURLY','LBRACKET','RBRACKET','SEMICOLON','LPAREN','RPAREN','COMMA','COLON',
-    'PLUS','MINUS','TIMES','DIVIDE','PERCENT',
+    'PLUS','MINUS','TIMES','DIVIDE','PERCENT','POWER',
     'VOIDTYPE','STRINGTYPE','INTTYPE','FLOATTYPE','CHARTYPE','BOOLEANTYPE'
     )
 
@@ -52,6 +52,7 @@ t_MINUS = r'-'
 t_TIMES = r'\*'
 t_DIVIDE = r'/'
 t_PERCENT = r'%'
+t_POWER = r'\^'
 t_COMMA = r','
 t_COLON = r':'
 
@@ -171,7 +172,7 @@ import ply.lex as lex # type: ignore
 lexer = lex.lex()
 
 if __name__ == '__main__':
-    filepath = '../test/1_lexical_error/countOccurrences1.pl'
+    filepath = '../test/0_valid/validTest.pl'
     with open(filepath, 'r') as file:
         for line in file:
             lexer.input(line)
