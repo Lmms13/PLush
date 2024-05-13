@@ -3,7 +3,7 @@ import sys
 
 #parsing data using plush_parser.py--------------------------
 if len(sys.argv) < 2:
-    filepath = '../test/0_valid/countOccurrences.pl'
+    filepath = '../test/3_semantic_error/isPalindrome2.pl'
 else:
     filepath = sys.argv[1]
 
