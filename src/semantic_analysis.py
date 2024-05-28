@@ -465,4 +465,3 @@ class SemanticAnalyzer:
 
     def get_errors(self):
         return self.errors
-    
