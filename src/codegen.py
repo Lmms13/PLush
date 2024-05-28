@@ -154,7 +154,15 @@ class CodeGenerator:
         code = f"{node.return_type} {node.name}("
         if node.arg_num > 0:
             for i, arg in enumerate(list(node.local_vars.values())[:node.arg_num]):
-                code += f"{arg.type} {arg.name}"
+                if arg.type.startswith("["):
+                    if arg.type[1:-1] == "string":
+                        code += f"char {arg.name}[]"
+                    else:
+                        code += f"{arg.type[1:-1]} {arg.name}[]"
+                elif arg.type == "string":
+                    code += f"char {arg.name}[]"
+                else:
+                    code += f"{arg.type} {arg.name}"
                 if i < node.arg_num - 1:
                     code += ", "
         code += ") {\n"
@@ -171,22 +179,58 @@ class CodeGenerator:
         code = f"{(node.return_type)} {node.name}("
         if node.arg_num > 0:
             for i, arg in enumerate(list(node.local_vars.values())[:node.arg_num]):
-                code += f"{arg.type} {arg.name}"
+                if arg.type.startswith("["):
+                    if arg.type[1:-1] == "string":
+                        code += f"char {arg.name}[]"
+                    else:
+                        code += f"{arg.type[1:-1]} {arg.name}[]"
+                elif arg.type == "string":
+                    code += f"char {arg.name}[]"
+                else:
+                    code += f"{arg.type} {arg.name}"
                 if i < node.arg_num - 1:
                     code += ", "
         code += ");\n"
         return code
 
     def generate_C_code_VariableDefinition(self, node):
+        if node.pointer.type.startswith("["):
+            if node.pointer.type[1:-1] == "string":
+                return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
+            else:
+                return f"{node.pointer.type[1:-1]} {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
+        elif node.pointer.type == "string":
+            return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
         return f"{node.pointer.type} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
 
     def generate_C_code_VariableDeclaration(self, node):
+        if node.type.startswith("["):
+            if node.type[1:-1] == "string":
+                return f"char {node.name}[];\n"
+            else:
+                return f"{node.type[1:-1]} {node.name}[];\n"
+        elif node.type == "string":
+            return f"char {node.name}[];\n"
         return f"{node.type} {node.name};\n"
 
     def generate_C_code_ValueDefinition(self, node):
+        if node.pointer.type.startswith("["):
+            if node.pointer.type[1:-1] == "string":
+                return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
+            else:
+                return f"{node.pointer.type[1:-1]} {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
+        elif node.pointer.type == "string":
+            return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
         return f"{node.pointer.type} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
 
     def generate_C_code_ValueDeclaration(self, node):
+        if node.type.startswith("["):
+            if node.type[1:-1] == "string":
+                return f"char {node.name}[];\n"
+            else:
+                return f"{node.type[1:-1]} {node.name}[];\n"
+        elif node.type == "string":
+            return f"char {node.name}[];\n"
         return f"{node.type} {node.name};\n"
 
     def generate_C_code_While(self, node):
