@@ -26,3 +26,5 @@ if not test_lexer(data):
 
             with open('./generated/'+filename+'.c', 'w') as file:
                 file.write(c_code)
+
+#./plushc.sh ./test/0_valid/isPalindrome.pl

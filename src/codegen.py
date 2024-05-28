@@ -85,6 +85,13 @@ class CodeGenerator:
             return ""
 
     def generate_C_code_Literal(self, node):
+        if type(node.value) == bool:
+            if node.value:
+                return "1"
+            else:
+                return "0"
+        elif type(node.value) == str:
+            return f"\"{node.value}\""
         return f"{node.value}"
 
     def generate_C_code_Array(self, node):
@@ -251,14 +258,18 @@ class CodeGenerator:
 
 
     def generate_C_code_While(self, node):
-        code = f"while ({self.generate_C_code(node.condition)}) {{\n"
+        condition = self.generate_C_code(node.condition)
+        condition = condition.replace(";", "")
+        code = f"while ({condition}) {{\n"
         for statement in node.body:
             code += "\t" + self.generate_C_code(statement)
         code += "\t}\n"
         return code
 
     def generate_C_code_If(self, node):
-        code = f"if ({self.generate_C_code(node.condition)}) {{\n"
+        condition = self.generate_C_code(node.condition)
+        condition = condition.replace(";", "")
+        code = f"if ({condition}) {{\n"
         for statement in node.then_block:
             code += "\t" + self.generate_C_code(statement)
         code += "\t}\n"
@@ -302,6 +313,8 @@ class CodeGenerator:
             return self.compute_type(var_type[1:-1], name) + "[]"
         elif var_type == "string":
             return f"char {name}[]"
+        elif var_type == "boolean":
+            return f"int {name}"
         else:
             return f"{var_type} {name}"
         
@@ -310,6 +323,8 @@ class CodeGenerator:
             return self.compute_return_type(ret_type[1:-1]) + "*"
         elif ret_type == "string":
             return f"char*"
+        elif ret_type == "boolean":
+            return f"int"
         else:
             return f"{ret_type}"
 
