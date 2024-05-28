@@ -57,8 +57,10 @@ class SemanticAnalyzer:
             self.visit(node)
         if self.errors:
             print("ERRORS:",self.errors)
+            return False
         else:
-            print("No semantic errors found")
+            #print("No semantic errors found")
+            return True
 
 
     def visit(self, node):
@@ -283,7 +285,6 @@ class SemanticAnalyzer:
             
             if node.arg_num > 0:
                 for arg in list(node.local_vars.values())[:node.arg_num]:
-                    # print(arg.name)
                     if self.context[-1].has_name(arg.name):
                         self.errors.append(f"Function arguments must have unique names, {arg.name} is repeated")
                         return None

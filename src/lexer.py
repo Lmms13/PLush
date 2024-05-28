@@ -177,6 +177,6 @@ def test_lexer(data: str):
         tok = lexer.token()
         if not tok: 
             break  # No more input
-    if not err:
-        print("All tokens are valid")
+    # if not err:
+    #     print("All tokens are valid")
     return err

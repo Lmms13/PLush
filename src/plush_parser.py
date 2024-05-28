@@ -483,8 +483,8 @@ parser = yacc.yacc()
 
 def parse_data(data: str):
     ast = parser.parse(data)
-    if ast is not None:
-        print("Syntax is valid")
+    # if ast is not None:
+    #     print("Syntax is valid")
     return ast
 
 # filepath = '../test/0_valid/validTest.pl'

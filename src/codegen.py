@@ -1,10 +1,10 @@
 from plush_parser import *
 
-filepath = '../test/0_valid/countOccurrences.pl'
-with open(filepath, 'r') as file:
-    data = file.read()
+# filepath = '../test/0_valid/countOccurrences.pl'
+# with open(filepath, 'r') as file:
+#     data = file.read()
 
-ast = parse_data(data)
+# ast = parse_data(data)
 
 class CodeGenerator:
 
@@ -157,7 +157,7 @@ class CodeGenerator:
         if(node.name == "main"):
             code = f"int main(int argc, char *argv[]) {{\n"                                                   
         else:
-            code = f"{node.return_type} {node.name}("
+            code = f"{self.compute_return_type(node.return_type)} {node.name}("
             if node.arg_num > 0:
                 for i, arg in enumerate(list(node.local_vars.values())[:node.arg_num]):
                     # if arg.type.startswith("["):
@@ -186,7 +186,7 @@ class CodeGenerator:
         return code
 
     def generate_C_code_FunctionDeclaration(self, node):
-        code = f"{(node.return_type)} {node.name}("
+        code = f"{self.compute_return_type(node.return_type)} {node.name}("
         if node.arg_num > 0:
             for i, arg in enumerate(list(node.local_vars.values())[:node.arg_num]):
                 # if arg.type.startswith("["):
@@ -304,12 +304,18 @@ class CodeGenerator:
             return f"char {name}[]"
         else:
             return f"{var_type} {name}"
+        
+    def compute_return_type(self, ret_type):
+        if ret_type.startswith("["):
+            return self.compute_return_type(ret_type[1:-1]) + "*"
+        elif ret_type == "string":
+            return f"char*"
+        else:
+            return f"{ret_type}"
 
+# codegen = CodeGenerator()
+# c_code = codegen.generate(ast)
+# print(c_code)
 
-
-codegen = CodeGenerator()
-c_code = codegen.generate(ast)
-print(c_code)
-
-with open('out.c', 'w') as file:
-    file.write(c_code)
+# with open('../generated/out.c', 'w') as file:
+#     file.write(c_code)
