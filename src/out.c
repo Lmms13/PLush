@@ -7,6 +7,7 @@ int countOccurrences(int n, int a[]) {
 ;
 	int i = 0;
 	int count = 0;
+	print_int(pow(2, 3));
 	while (i < len) {
 	if (a[i] == n) {
 	count = count + 1;

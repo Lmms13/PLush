@@ -118,7 +118,10 @@ class CodeGenerator:
         return f"{self.generate_C_code(node.left)} % {self.generate_C_code(node.right)}"
 
     def generate_C_code_Power(self, node):
-        return f"pow({self.generate_C_code(node.left)}, {self.generate_C_code(node.right)})"
+        if node.left.type == "int" and node.right.type == "int":
+            return f"(int) pow({self.generate_C_code(node.left)}, {self.generate_C_code(node.right)})"
+        else:
+            return f"pow({self.generate_C_code(node.left)}, {self.generate_C_code(node.right)})"
 
     def generate_C_code_And(self, node):
         return f"{self.generate_C_code(node.left)} && {self.generate_C_code(node.right)}"
