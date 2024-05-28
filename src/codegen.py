@@ -8,6 +8,8 @@ ast = parse_data(data)
 
 class CodeGenerator:
 
+    context = ""
+
     def generate(self, ast):
         code = "#include <stdio.h>\n#include <math.h>\n\n"
         for node in ast:
@@ -156,9 +158,13 @@ class CodeGenerator:
                 if i < node.arg_num - 1:
                     code += ", "
         code += ") {\n"
+
+        self.context = node.name
         for statement in node.body:
             code += "\t" + self.generate_C_code(statement)
         code += "}\n"
+        self.context = ""
+
         return code
 
     def generate_C_code_FunctionDeclaration(self, node):
@@ -209,7 +215,10 @@ class CodeGenerator:
         if isinstance(node.name, IndexAccess):
             return f"{node.name.name}[{self.generate_C_code(node.name.index)}] = {self.generate_C_code(node.value)};\n"
         else:
-            return f"{node.name} = {self.generate_C_code(node.value)};\n"
+            if(node.name == self.context):
+                return f"return {self.generate_C_code(node.value)};\n"
+            else:
+                return f"{node.name} = {self.generate_C_code(node.value)};\n"
 
     def generate_C_code_FunctionCall(self, node):
         code = f"{node.name}("
