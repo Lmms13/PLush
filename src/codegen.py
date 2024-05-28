@@ -151,26 +151,32 @@ class CodeGenerator:
         return f"-{self.generate_C_code(node.expression)}"
 
     def generate_C_code_FunctionDefinition(self, node):
-        code = f"{node.return_type} {node.name}("
-        if node.arg_num > 0:
-            for i, arg in enumerate(list(node.local_vars.values())[:node.arg_num]):
-                # if arg.type.startswith("["):
-                #     if arg.type[1:-1] == "string":
-                #         code += f"char {arg.name}[]"
-                #     else:
-                #         code += f"{arg.type[1:-1]} {arg.name}[]"
-                # elif arg.type == "string":
-                #     code += f"char {arg.name}[]"
-                # else:
-                #     code += f"{arg.type} {arg.name}"
-                code += f"{self.compute_type(arg.type, arg.name)}"
-                if i < node.arg_num - 1:
-                    code += ", "
-        code += ") {\n"
+        if(node.name == "main"):
+            code = f"int main(int argc, char *argv[]) {{\n"                                                   
+        else:
+            code = f"{node.return_type} {node.name}("
+            if node.arg_num > 0:
+                for i, arg in enumerate(list(node.local_vars.values())[:node.arg_num]):
+                    # if arg.type.startswith("["):
+                    #     if arg.type[1:-1] == "string":
+                    #         code += f"char {arg.name}[]"
+                    #     else:
+                    #         code += f"{arg.type[1:-1]} {arg.name}[]"
+                    # elif arg.type == "string":
+                    #     code += f"char {arg.name}[]"
+                    # else:
+                    #     code += f"{arg.type} {arg.name}"
+                    code += f"{self.compute_type(arg.type, arg.name)}"
+                    if i < node.arg_num - 1:
+                        code += ", "
+            code += ") {\n"
 
         self.context = node.name
         for statement in node.body:
             code += "\t" + self.generate_C_code(statement)
+    
+        if(node.name == "main"):
+            code += "\treturn 0;\n"
         code += "}\n"
         self.context = ""
 
@@ -268,7 +274,10 @@ class CodeGenerator:
             return f"{node.name.name}[{self.generate_C_code(node.name.index)}] = {self.generate_C_code(node.value)};\n"
         else:
             if(node.name == self.context):
-                return f"return {self.generate_C_code(node.value)};\n"
+                if(node.name != "main"):
+                    return f"return {self.generate_C_code(node.value)};\n"
+                else:
+                    return ""
             else:
                 return f"{node.name} = {self.generate_C_code(node.value)};\n"
 
@@ -301,9 +310,3 @@ print(c_code)
 
 with open('out.c', 'w') as file:
     file.write(c_code)
-
-#main needs to be a special case
-    #int main(int argc, char *argv[]) needs to be the header
-    #should return 0
-#array variables and values need to be a special case
-#strings are arrays of chars

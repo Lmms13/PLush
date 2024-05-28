@@ -273,6 +273,9 @@ class SemanticAnalyzer:
         if self.context[-1].has_name(node.name):
             self.errors.append(f"Function or variable with name {node.name} already declared in current scope")
             return None 
+        elif node.name == "main" and node.return_type != "void":
+            self.errors.append("Main function must have void return type")
+            return None
         else:
             self.context[-1].add_function(node)
             self.context.append(Context(self.context[-1]))
@@ -307,6 +310,9 @@ class SemanticAnalyzer:
         if self.context[-1].has_name(node.pointer.name):
             self.errors.append(f"Function or variable with name {node.pointer.name} already declared in current scope")
             return None 
+        elif node.pointer.name == "main":
+            self.errors.append(f"The name main cannot be used as a variable name")
+            return None
         elif node.pointer.type == "void":
             self.errors.append("Variable type cannot be void")
             return None
@@ -322,6 +328,9 @@ class SemanticAnalyzer:
         if self.context[-1].has_name(node.name):
             self.errors.append(f"Function or variable with name {node.name} already declared in current scope")
             return None 
+        elif node.pointer.name == "main":
+            self.errors.append(f"The name main cannot be used as a variable name")
+            return None
         elif node.type == "void":
             self.errors.append("Variable type cannot be void")
             return None
@@ -334,6 +343,9 @@ class SemanticAnalyzer:
         if self.context[-1].has_name(node.pointer.name):
             self.errors.append(f"Function or variable with name {node.pointer.name} already declared in current scope")
             return None 
+        elif node.pointer.name == "main":
+            self.errors.append(f"The name main cannot be used as a value name")
+            return None
         elif node.pointer.type == "void":
             self.errors.append("Value type cannot be void")
             return None
@@ -349,6 +361,9 @@ class SemanticAnalyzer:
         if self.context.has_name(node.name):
             self.errors.append(f"Function or variable with name {node.name} already declared in current scope")
             return None 
+        elif node.pointer.name == "main":
+            self.errors.append(f"The name main cannot be used as a value name")
+            return None
         elif node.type == "void":
             self.errors.append("Value type cannot be void")
             return None
@@ -420,6 +435,9 @@ class SemanticAnalyzer:
         elif self.context[-1].get_function(node.name) is not None:
             if len(self.context) == 1:
                 self.errors.append("Return statement outside of function scope")
+                return None
+            elif self.context[-1].get_function(node.name).return_type == "void":
+                self.errors.append("Function with void return type cannot have a return statement")
                 return None
             elif self.convert_type(self.context[-1].get_function(node.name).return_type) != self.visit(node.value):
                 self.errors.append("Incompatible types on return")
