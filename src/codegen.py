@@ -14,6 +14,8 @@ class CodeGenerator:
         code = "#include <stdio.h>\n#include <math.h>\n\n"
         for node in ast:
             code += self.generate_C_code(node)
+            # if not code.endswith(";\n") and not code.endswith("}\n"):
+            #     code += ";\n"
         return code
     
     def generate_C_code(self, node):
@@ -184,6 +186,8 @@ class CodeGenerator:
         self.context = node.name
         for statement in node.body:
             code += "\t" + self.generate_C_code(statement)
+            if not code.endswith(";\n") and not code.endswith("}\n"):
+                code += ";\n"
     
         if(node.name == "main"):
             code += "\treturn 0;\n"
@@ -262,18 +266,20 @@ class CodeGenerator:
 
 
     def generate_C_code_While(self, node):
-        condition = self.generate_C_code(node.condition)
-        condition = condition.replace(";", "")
-        code = f"while ({condition}) {{\n"
+        # condition = self.generate_C_code(node.condition)
+        # condition = condition.replace(";\n", "")
+        code = f"while ({self.generate_C_code(node.condition)}) {{\n"
         for statement in node.body:
             code += "\t" + self.generate_C_code(statement)
+            if not code.endswith(";\n") and not code.endswith("}\n"):
+                code += ";\n"
         code += "\t}\n"
         return code
 
     def generate_C_code_If(self, node):
-        condition = self.generate_C_code(node.condition)
-        condition = condition.replace(";", "")
-        code = f"if ({condition}) {{\n"
+        # condition = self.generate_C_code(node.condition)
+        # condition = condition.replace(";\n", "")
+        code = f"if ({self.generate_C_code(node.condition)}) {{\n"
         for statement in node.then_block:
             code += "\t" + self.generate_C_code(statement)
         code += "\t}\n"
@@ -281,6 +287,8 @@ class CodeGenerator:
             code += "else {\n"
             for statement in node.else_block:
                 code += "\t" + self.generate_C_code(statement)
+                if not code.endswith(";\n") and not code.endswith("}\n"):
+                    code += ";\n"
             code += "\t}\n"
         return code
 
@@ -306,7 +314,7 @@ class CodeGenerator:
                 code += f"{self.generate_C_code(arg)}"
                 if i < len(node.arguments) - 1:
                     code += ", "
-        code += ");\n"
+        code += ")"
         return code
 
     def generate_C_code_Error(self, node):

@@ -462,7 +462,13 @@ class SemanticAnalyzer:
 
 
     def visit_FunctionCall(self, node):
-        if self.context[-1].get_function(node.name) is None:
+        if len(self.context) == 1:
+            self.errors.append("Function calls outside of function scope are not allowed")
+            return None
+        elif node.name == "main":
+            self.errors.append("Cannot call main function")
+            return None
+        elif self.context[-1].get_function(node.name) is None:
             self.errors.append(f"Function {node.name} not declared")
             return None
         elif len(node.arguments) != self.context[-1].get_function(node.name).arg_num:
