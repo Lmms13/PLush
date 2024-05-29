@@ -10,6 +10,7 @@ int maxRangeSquared(int mi, int ma) {
 	if (current_candidate > current_max) {
 	current_max = current_candidate;
 	}
+	mi = mi + 1;
 	}
 	return current_max;
 }
