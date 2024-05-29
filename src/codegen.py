@@ -220,6 +220,8 @@ class CodeGenerator:
         # elif node.pointer.type == "string":
         #     return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
         # return f"{node.pointer.type} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
+        if node.pointer.type.startswith("[") and (isinstance(node.pointer.value, FunctionCall) or isinstance(node.pointer.value, Variable) or isinstance(node.pointer.value, Value) or isinstance(node.pointer.value, IndexAccess)):
+            return f"{self.compute_pointer_type(node.pointer.type)} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
         return f"{self.compute_type(node.pointer.type, node.pointer.name)} = {self.generate_C_code(node.pointer.value)};\n"
 
 
@@ -243,6 +245,8 @@ class CodeGenerator:
         # elif node.pointer.type == "string":
         #     return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
         # return f"{node.pointer.type} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
+        if node.pointer.type.startswith("[") and (isinstance(node.pointer.value, FunctionCall) or isinstance(node.pointer.value, Variable) or isinstance(node.pointer.value, Value) or isinstance(node.pointer.value, IndexAccess)):
+            return f"{self.compute_pointer_type(node.pointer.type)} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
         return f"{self.compute_type(node.pointer.type, node.pointer.name)} = {self.generate_C_code(node.pointer.value)};\n"
 
     def generate_C_code_ValueDeclaration(self, node):
@@ -317,6 +321,16 @@ class CodeGenerator:
             return f"int {name}"
         else:
             return f"{var_type} {name}"
+        
+    def compute_pointer_type(self, var_type):
+        if var_type.startswith("["):
+            return self.compute_pointer_type(var_type[1:-1]) + "*"
+        elif var_type == "string":
+            return f"char*"
+        elif var_type == "boolean":
+            return f"int"
+        else:
+            return f"{var_type}"
         
     def compute_return_type(self, ret_type):
         if ret_type.startswith("["):
