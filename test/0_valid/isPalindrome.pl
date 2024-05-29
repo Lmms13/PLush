@@ -16,6 +16,7 @@ function isPalindrome(val str: string) : boolean {
         if string_get_char_at(str, i) != string_get_char_at(str, (len - i - 1))  {
 			isPalindrome := false;
 		}
+		i := i + 1;
 	} 
 	isPalindrome := true;
 }
