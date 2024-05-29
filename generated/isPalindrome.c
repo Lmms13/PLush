@@ -19,7 +19,7 @@ int isPalindrome(char str[]) {
 	return 1;
 }
 int main(int argc, char *argv[]) {
-	char str[] = "racecaar";
+	char str[] = "racecar";
 	int result = isPalindrome(str);
 ;
 	print_boolean(result);
