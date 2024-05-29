@@ -1,14 +1,19 @@
 import os
 import sys
+import json
 from lexer import test_lexer
 from plush_parser import parse_data
 from semantic_analysis import *
 from codegen import *
 
+tree_flag = False 
+
 if len(sys.argv) < 2:
-    filepath = '../test/0_valid/countOccurrences.pl'
+    print("Usage:\nplush <filepath>\nplush --tree <filepath>")
 else:
-    filepath = sys.argv[1]
+    if sys.argv[1] == '--tree':
+        tree_flag = True       
+    filepath = sys.argv[-1]
 
 filename = os.path.splitext(os.path.basename(filepath))[0]
 
@@ -23,8 +28,10 @@ if not test_lexer(data):
         if SemanticAnalyzer(parse_data(data)).analyze():
             c_code = CodeGenerator().generate(ast)
             # print(c_code)
-
-            with open('./generated/'+filename+'.c', 'w') as file:
-                file.write(c_code)
+            if tree_flag:
+                print(json.dumps(ast, default=lambda o: o.__dict__, indent=4))
+            else:
+                with open('./generated/'+filename+'.c', 'w') as file:
+                    file.write(c_code)
 
 #./plushc.sh ./test/0_valid/isPalindrome.pl

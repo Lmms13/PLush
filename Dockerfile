@@ -24,3 +24,12 @@ RUN pip3 install ply
 
 # Convert any Windows-style line endings in plush.sh to Unix-style line endings
 RUN dos2unix plush.sh
+
+# Rename plush.sh to plush
+RUN mv plush.sh plush
+
+# Make sure plush.sh is executable
+RUN chmod +x plush
+
+# Add /app to PATH
+ENV PATH="/app:${PATH}"
