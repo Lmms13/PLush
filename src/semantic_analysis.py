@@ -98,7 +98,7 @@ class SemanticAnalyzer:
         elem_type = self.visit(node.elements[0])
         for element in node.elements:
             if self.visit(element) != elem_type:
-                self.errors.append("All elements of an array must have be of the same type")
+                self.errors.append("All elements of an array must be of the same type")
                 return None
         return List[elem_type]
 
@@ -290,9 +290,19 @@ class SemanticAnalyzer:
                         return None
                     else:
                         self.context[-1].add_var(arg)
-
+            
+            missing_return = True
             for statement in node.body:
-                self.visit(statement)
+                if node.return_type == "void":
+                    missing_return = False
+                if isinstance(statement, ReturnOrReassign):
+                    if statement.name == node.name and self.visit(statement) == self.convert_type(node.return_type):
+                        missing_return = False
+                else:
+                    self.visit(statement)
+            
+            if missing_return:
+                self.errors.append(f"Function {node.name} missing return statement")
 
             self.context.pop()
             return self.convert_type(node.return_type)
@@ -315,7 +325,7 @@ class SemanticAnalyzer:
             self.errors.append(f"The name main cannot be used as a variable name")
             return None
         elif node.pointer.type == "void":
-            self.errors.append("Variable type cannot be void")
+            self.errors.append("Variables cannot have void type")
             return None
         elif self.convert_type(node.pointer.type) != self.visit(node.pointer.value):
             self.errors.append(f"Incompatible types on variable definition of {node.pointer.name}")
@@ -333,7 +343,7 @@ class SemanticAnalyzer:
             self.errors.append(f"The name main cannot be used as a variable name")
             return None
         elif node.type == "void":
-            self.errors.append("Variable type cannot be void")
+            self.errors.append("Variables cannot have void type")
             return None
         else:
             self.context[-1].add_var(node)
@@ -348,7 +358,7 @@ class SemanticAnalyzer:
             self.errors.append(f"The name main cannot be used as a value name")
             return None
         elif node.pointer.type == "void":
-            self.errors.append("Value type cannot be void")
+            self.errors.append("Values cannot have void type")
             return None
         elif self.convert_type(node.pointer.type) != self.visit(node.pointer.value):
             self.errors.append(f"Incompatible types on value definition of {node.pointer.name}")
@@ -366,7 +376,7 @@ class SemanticAnalyzer:
             self.errors.append(f"The name main cannot be used as a value name")
             return None
         elif node.type == "void":
-            self.errors.append("Value type cannot be void")
+            self.errors.append("Values cannot have void type")
             return None
         else:
             self.context[-1].add_var(node)
@@ -401,10 +411,10 @@ class SemanticAnalyzer:
 
     def visit_IndexAccess(self, node):
         if self.context[-1].get_var(node.name) is None:
-            self.errors.append("Trying to index a non-existing array")
+            self.errors.append(F"Trying to index non-existing array {node.name}")
             return None
         elif not (self.context[-1].get_var(node.name).type.startswith('[') and self.context[-1].get_var(node.name).type.endswith(']')):
-            self.errors.append("Trying to index a non-array variable")
+            self.errors.append(F"Trying to index non-array variable {node.name}")
             return None
         elif self.visit(node.index) != int:
             self.errors.append("Index must be an integer")
@@ -422,7 +432,7 @@ class SemanticAnalyzer:
                 self.errors.append("Incompatible types on array element reassignment")
                 return None
             elif isinstance(self.context[-1].get_var(node.name.name), Value):
-                self.errors.append("Cannot reassign a constant")
+                self.errors.append(F"Cannot reassign constant {node.name.name}")
                 return None
             else: 
                 return self.visit(node.value)
@@ -441,20 +451,20 @@ class SemanticAnalyzer:
                 self.errors.append("Function with void return type cannot have a return statement")
                 return None
             elif self.convert_type(self.context[-1].get_function(node.name).return_type) != self.visit(node.value):
-                self.errors.append("Incompatible types on return")
+                self.errors.append(f"Incompatible types on return of function {node.name}")
                 return None
             else:
                 return self.visit(node.value)
         
         #if it's a reassignment
         elif self.context[-1].get_var(node.name) is None:
-            self.errors.append("Trying to reassign a non-existing variable")
+            self.errors.append(f"Trying to reassign non-existing variable {node.name}")
             return None
         elif self.convert_type(self.context[-1].get_var(node.name).type) != self.visit(node.value):
-            self.errors.append("Incompatible types on reassignment")
+            self.errors.append(f"Incompatible types on reassignment of {node.name}")
             return None
         elif isinstance(self.context[-1].get_var(node.name), Value):
-            self.errors.append("Cannot reassign a constant")
+            self.errors.append(f"Cannot reassign constant {node.name}")
             return None
         else:
             self.context[-1].set_var(node.name, node.value)

@@ -478,6 +478,15 @@ def p_expression_index_access(p):
     'expression : NAME LBRACKET expression RBRACKET'
     p[0] = IndexAccess(p[1], p[3])
 
+def p_error(p):
+    global err
+    err = True
+    if p:
+        print(f"Syntax error at '{p.value}'")
+    else:
+        print("Syntax error at EOF")
+
+err = False
 
 parser = yacc.yacc()
 
@@ -485,7 +494,7 @@ def parse_data(data: str):
     ast = parser.parse(data)
     # if ast is not None:
     #     print("Syntax is valid")
-    return ast
+    return (ast, err)
 
 # filepath = '../test/0_valid/validTest.pl'
 

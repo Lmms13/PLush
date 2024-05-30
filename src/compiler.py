@@ -21,11 +21,14 @@ with open(filepath, 'r') as file:
     data = file.read()
 
 if not test_lexer(data):
-    ast = parse_data(data)
-    if ast is not None:
+    parse_result = parse_data(data)
+    ast = parse_result[0]
+    parse_error = parse_result[1]
+    if not parse_error and ast is not None:
+        #print(ast)
         #there's some issue in the semantic analyzer that I couldn't 
         #find so it can't analyze the same ast
-        if SemanticAnalyzer(parse_data(data)).analyze():
+        if SemanticAnalyzer(parse_data(data)[0]).analyze():
             c_code = CodeGenerator().generate(ast)
             # print(c_code)
             if tree_flag:
