@@ -18,9 +18,8 @@ int* sortArray(int a[], int len) {
 }
 int main(int argc, char *argv[]) {
 	int len = 16;
-	int a[] = {6, 8, 4, 2, 4, 7, 1, 10, 8, 4, 9, 4, 3, 5, 2, 1};
+	int a[16] = {6, 8, 4, 2, 4, 7, 1, 10, 8, 4, 9, 4, 3, 5, 2, 1};
 	int* result = sortArray(a, len);
-;
 	print_int_array(result, len);
 	return 0;
 }

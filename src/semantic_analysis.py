@@ -1,5 +1,4 @@
 from plush_parser import *
-import traceback
 
 class Context:
     def __init__(self, parent=None):
@@ -316,12 +315,8 @@ class SemanticAnalyzer:
                 if node.return_type == "void":
                     missing_return = False
                 else:
-                    self.visit(statement)
                     missing_return = missing_return and self.find_return_statement(statement, node.name, node.return_type, missing_return)
-                # if isinstance(statement, ReturnOrReassign):
-                #     if statement.name == node.name and self.visit(statement) == self.convert_type(node.return_type):
-                #         missing_return = False
-                # else:
+                self.visit(statement)
             
             if missing_return:
                 self.errors.append(f"Function {node.name} missing return statement")
@@ -438,10 +433,17 @@ class SemanticAnalyzer:
         elif not (self.context[-1].get_var(node.name).type.startswith('[') and self.context[-1].get_var(node.name).type.endswith(']')):
             self.errors.append(F"Trying to index non-array variable {node.name}")
             return None
-        elif self.visit(node.index) != int:
-            self.errors.append("Index must be an integer")
-            return None
         else:
+            if isinstance(node.indexes, List):  
+                for index in node.indexes:
+                    if self.visit(index) != int and self.visit(index) != List[int]:
+                        self.errors.append("Index must be an integer")
+                        return None
+            else:
+                if self.visit(node.indexes) != int:
+                    self.errors.append("Index must be an integer")
+                    return None
+            #print(self.convert_type(self.context[-1].get_var(node.name).type[1:-1]))
             return self.convert_type(self.context[-1].get_var(node.name).type[1:-1])
 
 
@@ -449,7 +451,10 @@ class SemanticAnalyzer:
         #if it's an array element reassignment, it's a special case
         #so it needs to be handled before the rest
         if isinstance(node.name, IndexAccess):
-            arr_type = self.visit(node.name)
+            if(len(node.name.indexes) > 1):
+                arr_type = self.visit(node.name.indexes[0])
+            else:
+                arr_type = self.visit(node.name)
             if arr_type != self.visit(node.value):
                 self.errors.append("Incompatible types on array element reassignment")
                 return None
@@ -509,7 +514,12 @@ class SemanticAnalyzer:
         else:
             args = list(self.context[-1].get_function(node.name).local_vars.values())[:len(node.arguments)]
             for i, arg in enumerate(node.arguments):
-                if self.visit(arg) != self.convert_type(args[i].type):
+                if isinstance(arg, IndexAccess):
+                    if len(arg.indexes) > 1:
+                        if self.visit(arg.indexes[0]) != self.convert_type(args[i].type):
+                            self.errors.append(f"Type mismatch in function call of {node.name}")
+                            return None  
+                elif self.visit(arg) != self.convert_type(args[i].type):
                     self.errors.append(f"Type mismatch in function call of {node.name}")
                     return None
             return self.convert_type(self.context[-1].get_function(node.name).return_type)

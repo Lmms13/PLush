@@ -16,8 +16,10 @@ int countOccurrences(int n, int a[]) {
 	return count;
 }
 int main(int argc, char *argv[]) {
-	int a[] = {1, 2, 3, 4, 2, 6, 8, 2, 5, 7, 3, 2, 2, 1, 4, 5, 3, 2, 8, 10, 2};
-	a[-1] = 1;
+	int bb[2][13] = {{1, 2, 3, 4, 2, 6, 8, 2}, {5, 7, 3, 2, 2, 1, 4, 5, 3, 2, 8, 10, 2}};
+	bb[0][1] = 3;
+	int a[21] = {1, 2, 3, 4, 2, 6, 8, 2, 5, 7, 3, 2, 2, 1, 4, 5, 3, 2, 8, 10, 2};
+	a[0] = 3;
 	int result = countOccurrences(2, a);
 	print_int(result);
 	return 0;

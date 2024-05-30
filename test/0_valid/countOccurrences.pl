@@ -18,7 +18,10 @@ function countOccurrences(val n: int, val a: [int]) : int {
 
 
 function main(val args:[string]) {
-	val a : [int] := [1,2,3,4,2,6,8,2,5,7,3,2,2,1,4,5,3,2,8,10,2]; 
+	var bb :[[int]] := [[1,2,3,4,2,6,8,2],[5,7,3,2,2,1,4,5,3,2,8,10,2]];
+	bb[0][1] := 3;
+	var a : [int] := [1,2,3,4,2,6,8,2,5,7,3,2,2,1,4,5,3,2,8,10,2]; 
+	a[0] := 3;
 	val result : int := countOccurrences(2, a);
 	print_int(result);
 }

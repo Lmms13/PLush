@@ -165,7 +165,7 @@ class If(Statement):
 @dataclass
 class IndexAccess(Expression):
     name: str
-    index: Expression
+    indexes: List[Expression]
 
 @dataclass
 class ReturnOrReassign(Statement):
@@ -366,11 +366,11 @@ def p_function_declaration(p):
 
 def p_return_or_reassign_statement(p):
     '''return_or_reassign_statement : NAME ASSIGN expression SEMICOLON
-                                    | NAME LBRACKET expression RBRACKET ASSIGN expression SEMICOLON'''
+                                    | NAME index_access_list ASSIGN expression SEMICOLON'''
     if len(p) == 5:
         p[0] = ReturnOrReassign(p[1], p[3])
     else:
-        p[0] = ReturnOrReassign(IndexAccess(p[1], p[3]), p[6])
+        p[0] = ReturnOrReassign(IndexAccess(p[1], p[2]), p[4])
 
 
 def p_parameters(p):
@@ -474,9 +474,24 @@ def p_empty(p):
     'empty : '
     pass
 
+# def p_expression_index_access(p):
+#     'expression : NAME LBRACKET expression RBRACKET'
+#     p[0] = IndexAccess(p[1], p[3])
+
 def p_expression_index_access(p):
-    'expression : NAME LBRACKET expression RBRACKET'
-    p[0] = IndexAccess(p[1], p[3])
+    '''expression : NAME index_access_list'''
+    p[0] = IndexAccess(p[1], p[2])
+
+def p_index_access_list(p):
+    '''index_access_list : index_access_list LBRACKET expression RBRACKET
+                         | LBRACKET expression RBRACKET'''
+    if len(p) == 4:
+        # One-dimensional array
+        p[0] = [p[2]]  
+    else:
+        # Multi-dimensional array
+        p[1].append(p[3])
+        p[0] = p[1] 
 
 def p_error(p):
     global err

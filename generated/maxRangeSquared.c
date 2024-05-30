@@ -17,7 +17,6 @@ int maxRangeSquared(int mi, int ma) {
 void print_int(int str);
 int main(int argc, char *argv[]) {
 	int result = maxRangeSquared(actual_min, actual_max);
-;
 	print_int(result);
 	return 0;
 }

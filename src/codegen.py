@@ -1,4 +1,5 @@
 from plush_parser import *
+import traceback
 
 # filepath = '../test/0_valid/countOccurrences.pl'
 # with open(filepath, 'r') as file:
@@ -226,6 +227,9 @@ class CodeGenerator:
         # return f"{node.pointer.type} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
         if node.pointer.type.startswith("[") and (isinstance(node.pointer.value, FunctionCall) or isinstance(node.pointer.value, Variable) or isinstance(node.pointer.value, Value) or isinstance(node.pointer.value, IndexAccess)):
             return f"{self.compute_pointer_type(node.pointer.type)} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
+        elif node.pointer.type.startswith("[") and isinstance(node.pointer.value, Array):
+            lengths = self.max_length(node.pointer.value.elements)
+            return f"{self.compute_multi_dimensional_array(node.pointer.type, node.pointer.name, lengths)} = {self.generate_C_code(node.pointer.value)};\n"
         return f"{self.compute_type(node.pointer.type, node.pointer.name)} = {self.generate_C_code(node.pointer.value)};\n"
 
 
@@ -251,6 +255,9 @@ class CodeGenerator:
         # return f"{node.pointer.type} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
         if node.pointer.type.startswith("[") and (isinstance(node.pointer.value, FunctionCall) or isinstance(node.pointer.value, Variable) or isinstance(node.pointer.value, Value) or isinstance(node.pointer.value, IndexAccess)):
             return f"{self.compute_pointer_type(node.pointer.type)} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
+        elif node.pointer.type.startswith("[") and isinstance(node.pointer.value, Array):
+            lengths = self.max_length(node.pointer.value.elements)
+            return f"{self.compute_multi_dimensional_array(node.pointer.type, node.pointer.name, lengths)} = {self.generate_C_code(node.pointer.value)};\n"
         return f"{self.compute_type(node.pointer.type, node.pointer.name)} = {self.generate_C_code(node.pointer.value)};\n"
 
     def generate_C_code_ValueDeclaration(self, node):
@@ -293,11 +300,13 @@ class CodeGenerator:
         return code
 
     def generate_C_code_IndexAccess(self, node):
-        return f"{node.name}[{self.generate_C_code(node.index)}]"
+        indexes = ''.join(f'[{self.generate_C_code(index)}]' for index in node.indexes)
+        return f"{node.name}{indexes}"
 
     def generate_C_code_ReturnOrReassign(self, node):
         if isinstance(node.name, IndexAccess):
-            return f"{node.name.name}[{self.generate_C_code(node.name.index)}] = {self.generate_C_code(node.value)};\n"
+            indexes = ''.join([f'[{self.generate_C_code(index)}]' for index in node.name.indexes])
+            return f"{node.name.name}{indexes} = {self.generate_C_code(node.value)};\n"
         else:
             if(node.name == self.context):
                 if(node.name != "main"):
@@ -322,7 +331,7 @@ class CodeGenerator:
     
     def compute_type(self, var_type, name):
         if var_type.startswith("["):
-            return self.compute_type(var_type[1:-1], name) + "[]"
+            return self.compute_type(var_type[1:-1], name) + f"[]"
         elif var_type == "string":
             return f"char {name}[]"
         elif var_type == "boolean":
@@ -330,6 +339,32 @@ class CodeGenerator:
         else:
             return f"{var_type} {name}"
         
+    def compute_multi_dimensional_array(self, var_type, name, lengths):
+        if var_type.startswith("["):
+            return self.compute_multi_dimensional_array(var_type[1:-1], name, lengths[1:]) + f"[{lengths[0]}]"
+        elif var_type == "string":
+            return f"char {name}[]"
+        elif var_type == "boolean":
+            return f"int {name}"
+        else:
+            return f"{var_type} {name}"
+        
+    def max_length(self, lst, depth=0, max_lengths=None):
+        if max_lengths is None:
+            max_lengths = []
+
+        if depth >= len(max_lengths):
+            max_lengths.append(len(lst))
+        else:
+            max_lengths[depth] = max(max_lengths[depth], len(lst))
+
+        for item in lst:
+            if isinstance(item, Array):
+                self.max_length(item.elements, depth + 1, max_lengths)
+
+        return max_lengths[::-1]
+
+
     def compute_pointer_type(self, var_type):
         if var_type.startswith("["):
             return self.compute_pointer_type(var_type[1:-1]) + "*"

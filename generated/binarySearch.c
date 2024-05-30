@@ -24,7 +24,7 @@ else {
 	}
 }
 int main(int argc, char *argv[]) {
-	int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	int target = 7;
 	int result = binary_search(a, 0, array_length(a) - 1, target);
 	print_int(result);
