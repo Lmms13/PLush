@@ -7,7 +7,6 @@ function countOccurrences(val n: int, val a: [int]) : int {
 	val len : int := array_length(a);
 	var i : int := 0;
 	var count : int := 0; 
-	print_int(2 ^3); 
 	while i < len {
         if a[i] = n {
 			count := count + 1;

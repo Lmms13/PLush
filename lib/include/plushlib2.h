@@ -3,4 +3,6 @@
 
 void print_int(int str);
 
+int cast_float_to_int(float n);
+
 #endif

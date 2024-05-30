@@ -464,7 +464,7 @@ def p_if_statement(p):
     if len(p) == 6:
         p[0] = If(p[2], p[4], [])
     else:
-        p[0] = If(p[2], p[4], p[9])
+        p[0] = If(p[2], p[4], p[8])
 
 def p_while_statement(p):
     'statement : WHILE expression LCURLY body RCURLY'
@@ -492,8 +492,6 @@ parser = yacc.yacc()
 
 def parse_data(data: str):
     ast = parser.parse(data)
-    # if ast is not None:
-    #     print("Syntax is valid")
     return (ast, err)
 
 # filepath = '../test/0_valid/validTest.pl'

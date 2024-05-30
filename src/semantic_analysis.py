@@ -1,4 +1,5 @@
 from plush_parser import *
+import traceback
 
 class Context:
     def __init__(self, parent=None):
@@ -88,7 +89,26 @@ class SemanticAnalyzer:
                 return None
         elif type_string.startswith('[') and type_string.endswith(']'):
                 return List[self.convert_type(type_string[1:-1])]
-
+        
+    def find_return_statement(self, node, name, ret_type, missing_return):
+        if isinstance(node, ReturnOrReassign):
+            if node.name == name:
+                missing_return = False
+        elif isinstance(node, If):
+            for statement in node.then_block:
+                missing_return = self.find_return_statement(statement, name, ret_type, missing_return)
+                if not missing_return:
+                    return False
+            for statement in node.else_block:
+                missing_return = self.find_return_statement(statement, name, ret_type, missing_return)
+                if not missing_return:
+                    return False
+        elif isinstance(node, While):
+            for statement in node.body:
+                missing_return = self.find_return_statement(statement, name, ret_type, missing_return)
+                if not missing_return:
+                    return False
+        return missing_return
 
     def visit_Literal(self, node):
         return(type(node.value))
@@ -295,11 +315,13 @@ class SemanticAnalyzer:
             for statement in node.body:
                 if node.return_type == "void":
                     missing_return = False
-                if isinstance(statement, ReturnOrReassign):
-                    if statement.name == node.name and self.visit(statement) == self.convert_type(node.return_type):
-                        missing_return = False
                 else:
                     self.visit(statement)
+                    missing_return = missing_return and self.find_return_statement(statement, node.name, node.return_type, missing_return)
+                # if isinstance(statement, ReturnOrReassign):
+                #     if statement.name == node.name and self.visit(statement) == self.convert_type(node.return_type):
+                #         missing_return = False
+                # else:
             
             if missing_return:
                 self.errors.append(f"Function {node.name} missing return statement")
