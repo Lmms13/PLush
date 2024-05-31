@@ -7,7 +7,7 @@ setup.sh:
 - execute with `./setup.sh`
 
 plush.sh: 
-- script to run the compiler. The line to execute the resulting program is commented, uncomment it to run the program 
+- script to run the compiler. The line to execute the resulting program (line 60) is commented, uncomment it to run the program 
 - inside the container, it can be executed with the commands:
     - `plush <file.plush>` to compile a file
     - `plush -tree <file.plush>` to compile and print a JSON representation of the AST

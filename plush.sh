@@ -57,7 +57,7 @@ else
         clang ./generated/optimized.bc -o ./generated/"$filename" -lm
 
         # Run the executable
-        ./generated/"$filename"
+        #./generated/"$filename"
 
         # Cleanup
         #rm out.bc
