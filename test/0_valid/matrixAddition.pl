@@ -14,11 +14,6 @@ function main(val args:[string]) {
             result[i][j] := matrix1[i][j] + matrix2[i][j];
             j := j + 1;
         }
-        i := i + 1;
-    }
-
-    i := 0;
-    while i < rows {
         print_int_array(result[i], cols);
         i := i + 1;
     }
