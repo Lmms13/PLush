@@ -1,12 +1,6 @@
-#declaration of function for FFI
-function array_length(val a: [int]) : int;
+function print_int_array(val arr: [int], val size: int);
 
-
-function print_int_array(val arr: [int]);
-
-
-function sortArray(var a: [int]) : [string]{
-	val len : int := array_length(a);
+function sortArray(var a: [int], val len:int) : [string]{
 	var i : int := 1;
 	var temp : int := 0;
 
@@ -24,7 +18,8 @@ function sortArray(var a: [int]) : [string]{
 
 
 function main(val args:[string]) {
+	val len : int := 16;
 	var a : [int] := [6,8,4,2,4,7,1,10,8,4,9,4,3,5,2,1];
-	val result : [int] := sortArray(a);
-	print_int_array(result);
+	val result : [int] := sortArray(a, len);
+	print_int_array(result, len);
 }

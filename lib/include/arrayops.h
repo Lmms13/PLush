@@ -1,5 +1,5 @@
-#ifndef PLUSHLIB3_H
-#define PLUSHLIB3_H
+#ifndef ARRAYOPS_H
+#define ARRAYOPS_H
 
 void print_int_array(int arr[], int size);
 

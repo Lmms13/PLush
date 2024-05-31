@@ -1,6 +1,4 @@
-#declaration of function for FFI
 function print_int_array(val arr: [int], val size: int);
-
 
 function sortArray(var a: [int], val len:int) : [int]{
 	var i : int := 1;

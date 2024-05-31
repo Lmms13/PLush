@@ -8,6 +8,7 @@ function maxRangeSquared(var mi:int, val ma:int) : int {
 		if current_candidate > current_max {
 			current_max := current_candidate;
 		}
+		#added by me because there was in infinite loop
 		mi := mi + 1;
 	} 
 	maxRangeSquared := current_max; # This line returns the current max!

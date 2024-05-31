@@ -1,13 +1,8 @@
-#declaration of function for FFI
 function string_length(val str: string) : int;
 
-
-#declaration of function for FFI
 function string_get_char_at(val str: string, val index: int) : char;
 
-
 function print_boolean(val str: boolean);
-
 
 function isPalindrome(val str: string) : boolean {
   #string instead of int
