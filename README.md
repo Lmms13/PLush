@@ -2,6 +2,7 @@ Luís Santos 56341
 
 Note about the submission:
 - I just zipped the folder with the .git file and delivered it. I'm not sure if that was the correct way to submit the project, but I didn't see what else "You will submit a zip folder that contains a git repo" could mean.
+- There are also no extra features. I had a prototype for garbage collection but I would have to severely alter the codegen and there wasn't much time left.
 
 # PLush
 
