@@ -25,16 +25,12 @@ if not test_lexer(data):
     ast = parse_result[0]
     parse_error = parse_result[1]
     if not parse_error and ast is not None:
-        #print(ast)
         #there's some issue in the semantic analyzer that I couldn't 
-        #find so it can't analyze the same ast
+        #find so it can't analyze the same ast, though it is the same data
         if SemanticAnalyzer(parse_data(data)[0]).analyze():
             c_code = CodeGenerator().generate(ast)
-            # print(c_code)
             if tree_flag:
                 print(json.dumps(ast, default=lambda o: o.__dict__, indent=4))
             else:
                 with open('./generated/'+filename+'.c', 'w') as file:
                     file.write(c_code)
-
-#./plushc.sh ./test/0_valid/isPalindrome.pl

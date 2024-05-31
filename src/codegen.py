@@ -1,11 +1,4 @@
 from plush_parser import *
-import traceback
-
-# filepath = '../test/0_valid/countOccurrences.pl'
-# with open(filepath, 'r') as file:
-#     data = file.read()
-
-# ast = parse_data(data)
 
 class CodeGenerator:
 
@@ -15,8 +8,6 @@ class CodeGenerator:
         code = "#include <stdio.h>\n#include <math.h>\n\n"
         for node in ast:
             code += self.generate_C_code(node)
-            # if not code.endswith(";\n") and not code.endswith("}\n"):
-            #     code += ";\n"
         return code
     
     def generate_C_code(self, node):
@@ -170,15 +161,6 @@ class CodeGenerator:
             code = f"{self.compute_return_type(node.return_type)} {node.name}("
             if node.arg_num > 0:
                 for i, arg in enumerate(list(node.local_vars.values())[:node.arg_num]):
-                    # if arg.type.startswith("["):
-                    #     if arg.type[1:-1] == "string":
-                    #         code += f"char {arg.name}[]"
-                    #     else:
-                    #         code += f"{arg.type[1:-1]} {arg.name}[]"
-                    # elif arg.type == "string":
-                    #     code += f"char {arg.name}[]"
-                    # else:
-                    #     code += f"{arg.type} {arg.name}"
                     code += f"{self.compute_type(arg.type, arg.name)}"
                     if i < node.arg_num - 1:
                         code += ", "
@@ -201,15 +183,6 @@ class CodeGenerator:
         code = f"{self.compute_return_type(node.return_type)} {node.name}("
         if node.arg_num > 0:
             for i, arg in enumerate(list(node.local_vars.values())[:node.arg_num]):
-                # if arg.type.startswith("["):
-                #     if arg.type[1:-1] == "string":
-                #         code += f"char {arg.name}[]"
-                #     else:
-                #         code += f"{arg.type[1:-1]} {arg.name}[]"
-                # elif arg.type == "string":
-                #     code += f"char {arg.name}[]"
-                #else:
-                    #code += f"{arg.type} {arg.name}"
                 code += f"{self.compute_type(arg.type, arg.name)}"
                 if i < node.arg_num - 1:
                     code += ", "
@@ -217,14 +190,6 @@ class CodeGenerator:
         return code
 
     def generate_C_code_VariableDefinition(self, node):
-        # if node.pointer.type.startswith("["):
-        #     if node.pointer.type[1:-1] == "string":
-        #         return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
-        #     else:
-        #         return f"{node.pointer.type[1:-1]} {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
-        # elif node.pointer.type == "string":
-        #     return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
-        # return f"{node.pointer.type} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
         if node.pointer.type.startswith("[") and (isinstance(node.pointer.value, FunctionCall) or isinstance(node.pointer.value, Variable) or isinstance(node.pointer.value, Value) or isinstance(node.pointer.value, IndexAccess)):
             return f"{self.compute_pointer_type(node.pointer.type)} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
         elif node.pointer.type.startswith("[") and isinstance(node.pointer.value, Array):
@@ -234,25 +199,9 @@ class CodeGenerator:
 
 
     def generate_C_code_VariableDeclaration(self, node):
-        # if node.type.startswith("["):
-        #     if node.type[1:-1] == "string":
-        #         return f"char {node.name}[];\n"
-        #     else:
-        #         return f"{node.type[1:-1]} {node.name}[];\n"
-        # elif node.type == "string":
-        #     return f"char {node.name}[];\n"
-        # return f"{node.type} {node.name};\n"
         return f"{self.compute_type(node.type, node.name)};\n"
 
     def generate_C_code_ValueDefinition(self, node):
-        # if node.pointer.type.startswith("["):
-        #     if node.pointer.type[1:-1] == "string":
-        #         return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
-        #     else:
-        #         return f"{node.pointer.type[1:-1]} {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
-        # elif node.pointer.type == "string":
-        #     return f"char {node.pointer.name}[] = {self.generate_C_code(node.pointer.value)};\n"
-        # return f"{node.pointer.type} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
         if node.pointer.type.startswith("[") and (isinstance(node.pointer.value, FunctionCall) or isinstance(node.pointer.value, Variable) or isinstance(node.pointer.value, Value) or isinstance(node.pointer.value, IndexAccess)):
             return f"{self.compute_pointer_type(node.pointer.type)} {node.pointer.name} = {self.generate_C_code(node.pointer.value)};\n"
         elif node.pointer.type.startswith("[") and isinstance(node.pointer.value, Array):
@@ -261,20 +210,10 @@ class CodeGenerator:
         return f"{self.compute_type(node.pointer.type, node.pointer.name)} = {self.generate_C_code(node.pointer.value)};\n"
 
     def generate_C_code_ValueDeclaration(self, node):
-        # if node.type.startswith("["):
-        #     if node.type[1:-1] == "string":
-        #         return f"char {node.name}[];\n"
-        #     else:
-        #         return f"{node.type[1:-1]} {node.name}[];\n"
-        # elif node.type == "string":
-        #     return f"char {node.name}[];\n"
-        # return f"{node.type} {node.name};\n"
         return f"{self.compute_type(node.type, node.name)};\n"
 
 
     def generate_C_code_While(self, node):
-        # condition = self.generate_C_code(node.condition)
-        # condition = condition.replace(";\n", "")
         code = f"while ({self.generate_C_code(node.condition)}) {{\n"
         for statement in node.body:
             code += "\t" + self.generate_C_code(statement)
@@ -284,8 +223,6 @@ class CodeGenerator:
         return code
 
     def generate_C_code_If(self, node):
-        # condition = self.generate_C_code(node.condition)
-        # condition = condition.replace(";\n", "")
         code = f"if ({self.generate_C_code(node.condition)}) {{\n"
         for statement in node.then_block:
             code += "\t" + self.generate_C_code(statement)
@@ -384,10 +321,3 @@ class CodeGenerator:
             return f"int"
         else:
             return f"{ret_type}"
-
-# codegen = CodeGenerator()
-# c_code = codegen.generate(ast)
-# print(c_code)
-
-# with open('../generated/out.c', 'w') as file:
-#     file.write(c_code)

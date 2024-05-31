@@ -1,25 +1,41 @@
 #!/bin/bash
 
-# Check if the first argument is --tree
-if [ "$1" == "--tree" ]; then
-    # Remove the first argument
-    shift
+# Get the filepath from the last command line argument
+filepath=${!#}
 
-    # Get the filename from the last command line argument
-    filepath=${!#}
+# Get the file extension
+extension="${filepath##*.}"
 
-    # Extract the filename without the extension
-    filename=$(basename "$filepath" .pl)
+# Check if the file extension is not 'pl'
+if [ "$extension" != "pl" ]; then
+    echo "The PLush compiler only works for .pl files"
+    exit 1
+fi
 
+# Extract the filename without the extension
+filename=$(basename "$filepath" .pl)
+
+# Initialize a flag variable
+tree_flag=0
+
+# Loop through all arguments
+for arg in "$@"
+do
+    # Check if the current argument is --tree
+    if [ "$arg" == "--tree" ]; then
+        # Set the flag to 1 and break the loop
+        tree_flag=1
+        break
+    fi
+done
+
+# If the flag is set to 1
+if [ $tree_flag -eq 1 ]; then
     # Generate the AST and print it
     python3 ./src/compiler.py --tree "$filepath"
+
 else
-    # Get the filename from the last command line argument
-    filepath=${!#}
-
-    # Extract the filename without the extension
-    filename=$(basename "$filepath" .pl)
-
+    #compiling and checking if the output is empty, meaning there are no errors
     output=$(python3 ./src/compiler.py "$filepath" | tee /dev/fd/2)
 
     if [ -z "$output" ]; then

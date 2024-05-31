@@ -477,10 +477,6 @@ def p_empty(p):
     'empty : '
     pass
 
-# def p_expression_index_access(p):
-#     'expression : NAME LBRACKET expression RBRACKET'
-#     p[0] = IndexAccess(p[1], p[3])
-
 def p_expression_index_access(p):
     '''expression : NAME index_access_list'''
     p[0] = IndexAccess(p[1], p[2])
@@ -511,12 +507,3 @@ parser = yacc.yacc()
 def parse_data(data: str):
     ast = parser.parse(data)
     return (ast, err)
-
-# filepath = '../test/0_valid/validTest.pl'
-
-# with open(filepath, 'r') as file:
-#     data = file.read()
-
-# ast = parser.parse(data)
-
-# print(ast)

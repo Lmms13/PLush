@@ -1,4 +1,3 @@
-import typing
 from plush_parser import *
 
 class Context:
