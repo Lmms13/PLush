@@ -366,8 +366,11 @@ def p_function_declaration(p):
 
 def p_return_or_reassign_statement(p):
     '''return_or_reassign_statement : NAME ASSIGN expression SEMICOLON
-                                    | NAME index_access_list ASSIGN expression SEMICOLON'''
+                                    | NAME index_access_list ASSIGN expression SEMICOLON
+                                    | NAME ASSIGN VOIDTYPE SEMICOLON'''
     if len(p) == 5:
+        if p[3] == 'void':
+            p[3] = None
         p[0] = ReturnOrReassign(p[1], p[3])
     else:
         p[0] = ReturnOrReassign(IndexAccess(p[1], p[2]), p[4])

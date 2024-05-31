@@ -1,6 +1,6 @@
 function print_int_array(val arr: [int], val size: int);
 
-function swap(val a: [int], val i: int, val j: int) : [int] {
+function swap(var a: [int], val i: int, val j: int) : [int] {
     val temp : int := a[i];
     a[i] := a[j];
     a[j] := temp;
@@ -32,8 +32,8 @@ function quicksort(var a: [int], val low: int, val high: int) : [int] {
 }
 
 function main(val args:[string]) {
-    val len : int := 6;
-    val a : [int] := [10, 7, 8, 9, 1, 5];
+    val len : int := 13;
+    val a : [int] := [10, 7, 8, 9, 1, 13, 5, 3, 12, 6, 11, 2, 4];
     quicksort(a, 0, len - 1);
     print_int_array(a, len);
 }

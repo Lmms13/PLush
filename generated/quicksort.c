@@ -31,8 +31,8 @@ int* quicksort(int a[], int low, int high) {
 	return a;
 }
 int main(int argc, char *argv[]) {
-	int len = 6;
-	int a[] = {10, 7, 8, 9, 1, 5};
+	int len = 13;
+	int a[13] = {10, 7, 8, 9, 1, 13, 5, 3, 12, 6, 11, 2, 4};
 	quicksort(a, 0, len - 1);
 	print_int_array(a, len);
 	return 0;

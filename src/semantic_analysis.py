@@ -474,9 +474,11 @@ class SemanticAnalyzer:
             if len(self.context) == 1:
                 self.errors.append("Return statement outside of function scope")
                 return None
-            elif self.context[-1].get_function(node.name).return_type == "void":
-                self.errors.append("Function with void return type cannot have a return statement")
+            elif self.context[-1].get_function(node.name).return_type == "void" and node.value is not None:
+                self.errors.append("Function with void return type cannot return a value")
                 return None
+            elif self.context[-1].get_function(node.name).return_type == "void" and node.value is None:
+                return self.convert_type(self.context[-1].get_function(node.name).return_type)
             elif self.convert_type(self.context[-1].get_function(node.name).return_type) != self.visit(node.value):
                 self.errors.append(f"Incompatible types on return of function {node.name}")
                 return None
