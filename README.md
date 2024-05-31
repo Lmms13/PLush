@@ -9,15 +9,15 @@ setup.sh:
 plush.sh: 
 - script to run the compiler. The line to execute the resulting program (line 60) is commented, uncomment it to run the program 
 - inside the container, it can be executed with the commands:
-    - `plush <file.plush>` to compile a file
-    - `plush -tree <file.plush>` to compile and print a JSON representation of the AST
+    - `plush <file.pl>` to compile a file and generate the C file and the binary file
+    - `plush -tree <file.pl>` to compile and print a JSON representation of the AST
     - notes: 
         - the last argument must be the filepath to the PLush file (as stated in the project definition)
         - the --tree flag can be anywhere (as stated in the project definition), but not in the last position, because that's where the .pl file should be (as stated in the project definition)
         - all the other arguments are ignored
 
 Dockerfile:
-- file to build the docker container
+- file to build the docker container, used in `setup.sh`
 
 src:
 - contains the files:
@@ -38,7 +38,7 @@ generated:
 - the lib directory is used in the compiling stage, but the files stored there are deleted after the compilation
 
 test:
-- 0_valid: contains valid PLush code to test the compiler, plus the expected output for each program
-- 1_lexical_error: contains PLush code with lexical errors to test the lexer
-- 2_syntactic_error: contains PLush code with syntactic errors to test the parser
-- 3_semantic_error: contains PLush code with semantic errors to test the typechecker
+- 0_valid: contains valid PLush programs to test the compiler, plus the expected output for each program
+- 1_lexical_error: contains PLush programs with lexical errors to test the lexer
+- 2_syntactic_error: contains PLush programs with syntactic errors to test the parser
+- 3_semantic_error: contains PLush programs with semantic errors to test the typechecker
