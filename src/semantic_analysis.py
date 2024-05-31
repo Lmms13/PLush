@@ -1,3 +1,4 @@
+import typing
 from plush_parser import *
 
 class Context:
@@ -88,7 +89,8 @@ class SemanticAnalyzer:
                 return None
         elif type_string.startswith('[') and type_string.endswith(']'):
                 return List[self.convert_type(type_string[1:-1])]
-        
+
+
     def find_return_statement(self, node, name, ret_type, missing_return):
         if isinstance(node, ReturnOrReassign):
             if node.name == name:
@@ -443,8 +445,9 @@ class SemanticAnalyzer:
                 if self.visit(node.indexes) != int:
                     self.errors.append("Index must be an integer")
                     return None
-            #print(self.convert_type(self.context[-1].get_var(node.name).type[1:-1]))
-            return self.convert_type(self.context[-1].get_var(node.name).type[1:-1])
+            arr = self.context[-1].get_var(node.name)
+            num_dimensions = arr.type.count('[')
+            return self.convert_type(arr.type[num_dimensions:-num_dimensions])
 
 
     def visit_ReturnOrReassign(self, node):
